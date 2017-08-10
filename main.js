@@ -1,3 +1,9 @@
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
 var linebot = require('linebot');
 var express = require('express');
 var request = require("request");
@@ -16,15 +22,16 @@ bot.on('message', function (event) {
 
         if (msg.indexOf("天氣") !== -1) {
             send_weather(event);
-        }else{
+        } else if (msg.indexOf("ETH") !== -1||msg.indexOf("以太") !== -1) {
+            sendETH(event, msg);
+        } else {
             sendMsg(event, msg);
         }
     }
 });
-
-const app = express();
-const linebotParser = bot.parser();
-app.post('/', linebotParser);
+        const app = express();
+        const linebotParser = bot.parser();
+        app.post('/', linebotParser);
 
 //因為 express 預設走 port 3000，而 heroku 上預設卻不是，要透過下列程式轉換
 var server = app.listen(process.env.PORT || 3000, function () {
@@ -60,6 +67,28 @@ function send_weather(event) {
     });
 }
 
+function sendETH(event) {
+    var url = 'https://www.coingecko.com/en/price_charts/ethereum/twd';
+    request(url, function (err, res, body) {
+        var data = [];
+        var $ = cheerio.load(body);
+        // 把要到的資料放進 cheerio
+        $('.table-responsive .table tbody tr td[style^="text"]').each(function (i, elem) {
+            data.push($(this).text().split('\n'));
+        });
+        // 語法都跟 jquery 一樣
+        // 找到 class = "FcstBoxTable01"
+        // 再找標籤 <tbody>
+        // 取得裡面的每一個 <tr>
+        // 取文字部分分行之後放進 weather
+        var result = String(data[0]);
+        var result_int = result.replace(/,/g, "");
+        //console.log(result_int.trim());
+        //傳送
+        sendMsg(event, '目前ETH價格:\n' + result_int.trim());
+    });
+}
+
 
 // 傳送訊息
 function sendMsg(event, msg) {
@@ -71,3 +100,4 @@ function sendMsg(event, msg) {
         console.log('error');
     });
 }
+
