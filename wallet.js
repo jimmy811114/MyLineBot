@@ -37,7 +37,7 @@ exports.set_Money = function (money, status, event) {
 };
 
 //重新計算
-exports.set_Money = function (money, status, event) {
+exports.reset = function (event) {
     var connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',

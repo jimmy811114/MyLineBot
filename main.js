@@ -43,6 +43,9 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("錢") !== -1) {
                 //顯示錢
                 wallet.show_Money(event);
+            } else if (msg.indexOf("清除") !== -1) {
+                //重新計算
+                wallet.reset(event);
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
                 sendMsg(event, robot_msg + msg);
