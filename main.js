@@ -17,32 +17,39 @@ var bot = linebot({
 
 bot.on('message', function (event) {
     console.log(event); //把收到訊息的 event 印出來看看
-    if (event.message.type === 'text') {
-        var msg = event.message.text;
-        if (msg.indexOf("天氣") !== -1) {
-            //傳送天氣資訊
-            my_robot.send_weather(event);
-        } else if (msg.indexOf("ETH") !== -1 || msg.indexOf("以太") !== -1) {
-            //傳送以太幣資訊
-            my_robot.send_ETH(event);
-        } else if (msg.indexOf("開燈") !== -1) {
-            //開燈
-            my_robot.set_light(event, 1);
-        } else if (msg.indexOf("關燈") !== -1) {
-            //關燈
-            my_robot.set_light(event, 0);
-        } else if (msg.indexOf("+") !== -1) {
-            //存錢
-            var money = parseInt(msg);
-            wallet.set_Money(money, 1, event);
-        } else if (msg.indexOf("-") !== -1) {
-            //扣錢
-            var money = parseInt(msg);
-            wallet.set_Money(money, 0, event);
-        } else {
-            var robot_msg = '抱歉，我聽不懂你說什麼：\n';
-            sendMsg(event, robot_msg + msg);
+    try {
+        if (event.message.type === 'text') {
+            var msg = event.message.text;
+            if (msg.indexOf("天氣") !== -1) {
+                //傳送天氣資訊
+                my_robot.send_weather(event);
+            } else if (msg.indexOf("ETH") !== -1 || msg.indexOf("以太") !== -1) {
+                //傳送以太幣資訊
+                my_robot.send_ETH(event);
+            } else if (msg.indexOf("開燈") !== -1) {
+                //開燈
+                my_robot.set_light(event, 1);
+            } else if (msg.indexOf("關燈") !== -1) {
+                //關燈
+                my_robot.set_light(event, 0);
+            } else if (msg.indexOf("+") !== -1) {
+                //存錢
+                var money = msg.substring(1);
+                wallet.set_Money(money, 1, event);
+            } else if (msg.indexOf("-") !== -1) {
+                //扣錢
+                var money = msg.substring(1);
+                wallet.set_Money(money, 0, event);
+            } else if (msg.indexOf("錢") !== -1) {
+                //顯示錢
+                wallet.show_Money(event);
+            } else {
+                var robot_msg = '抱歉，我聽不懂你說什麼：\n';
+                sendMsg(event, robot_msg + msg);
+            }
         }
+    } catch (err) {
+        sendMsg(event, '錯誤指令:' + err);
     }
 });
 
