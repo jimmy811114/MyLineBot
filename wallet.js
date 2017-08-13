@@ -45,7 +45,7 @@ exports.reset = function (event) {
         database: 'wallet'
     });
     connection.connect();
-    var addSql = 'drop table money';
+    var addSql = 'TRUNCATE table money';
     //建立
     connection.query(addSql, function (err, result) {
         if (err) {
