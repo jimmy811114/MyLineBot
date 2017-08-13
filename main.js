@@ -6,7 +6,8 @@
 
 var linebot = require('linebot');
 var express = require('express');
-var my_robot = require('./MyRobot.js');
+var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
+var wallet = require('./wallet.js'); //錢包
 
 var bot = linebot({
     channelId: '1521465147',
@@ -30,6 +31,14 @@ bot.on('message', function (event) {
         } else if (msg.indexOf("關燈") !== -1) {
             //關燈
             my_robot.set_light(event, 0);
+        } else if (msg.indexOf("+") !== -1) {
+            //存錢
+            var money = parseInt(msg);
+            wallet.set_Money(money, 1, event);
+        } else if (msg.indexOf("-") !== -1) {
+            //扣錢
+            var money = parseInt(msg);
+            wallet.set_Money(money, 0, event);
         } else {
             var robot_msg = '抱歉，我聽不懂你說什麼：\n';
             sendMsg(event, robot_msg + msg);
