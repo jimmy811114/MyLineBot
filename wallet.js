@@ -67,8 +67,8 @@ exports.show_Money = function (user_id, event) {
         database: 'wallet'
     });
     connection.connect();
-    var sql = "SELECT sum(money) as total FROM money where type = 1 where user = '" + user_id + "'";
-    var sql0 = "SELECT sum(money) as total FROM money where type = 0 where user = '" + user_id + "'";
+    var sql = "SELECT sum(money) as total FROM money where type = 1 and user = '" + user_id + "'";
+    var sql0 = "SELECT sum(money) as total FROM money where type = 0 and user = '" + user_id + "'";
     var mon_1;
     var mon_0;
     connection.query(sql, function (err, result, fields) {
