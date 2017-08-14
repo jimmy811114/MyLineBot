@@ -16,7 +16,7 @@ exports.set_Money = function (userId, money, status, event) {
     });
     connection.connect();
     var addSql = 'INSERT INTO money(money,type,user) VALUES(?,?,?)';
-    var addSqlParams = [money, status];
+    var addSqlParams = [money, status, userId];
     //建立
     connection.query(addSql, addSqlParams, function (err, result) {
         if (err) {
