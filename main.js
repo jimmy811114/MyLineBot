@@ -51,7 +51,7 @@ bot.on('message', function (event) {
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
 
-                fs.readfile('help.txt', function (error, content) { //讀取file.txt檔案的內容
+                fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
                     if (error) { //如果有錯誤就列印訊息並離開程式
                         console.log('檔案讀取錯誤。');
                     } else {
