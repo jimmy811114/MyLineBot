@@ -20,6 +20,7 @@ bot.on('message', function (event) {
     try {
         if (event.message.type === 'text') {
             var msg = event.message.text;
+            var user_id = event.source.userId;
             if (msg.indexOf("天氣") !== -1) {
                 //傳送天氣資訊
                 my_robot.send_weather(event);
@@ -35,17 +36,17 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("+") !== -1) {
                 //存錢
                 var money = msg.substring(1);
-                wallet.set_Money(money, 1, event);
+                wallet.set_Money(user_id, money, 1, event);
             } else if (msg.indexOf("-") !== -1) {
                 //扣錢
                 var money = msg.substring(1);
-                wallet.set_Money(money, 0, event);
+                wallet.set_Money(user_id, money, 0, event);
             } else if (msg.indexOf("錢") !== -1) {
                 //顯示錢
-                wallet.show_Money(event);
+                wallet.show_Money(user_id, event);
             } else if (msg.indexOf("清除") !== -1) {
                 //重新計算
-                wallet.reset(event);
+                wallet.reset(user_id,event);
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
                 sendMsg(event, robot_msg + msg);

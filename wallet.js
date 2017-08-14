@@ -7,7 +7,7 @@
 var mysql = require('mysql');
 
 //建立
-exports.set_Money = function (money, status, event) {
+exports.set_Money = function (userId, money, status, event) {
     var connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
@@ -15,7 +15,7 @@ exports.set_Money = function (money, status, event) {
         database: 'wallet'
     });
     connection.connect();
-    var addSql = 'INSERT INTO money(money,type) VALUES(?,?)';
+    var addSql = 'INSERT INTO money(money,type,user) VALUES(?,?,?)';
     var addSqlParams = [money, status];
     //建立
     connection.query(addSql, addSqlParams, function (err, result) {
@@ -37,7 +37,7 @@ exports.set_Money = function (money, status, event) {
 };
 
 //重新計算
-exports.reset = function (event) {
+exports.reset = function (user_id, event) {
     var connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
@@ -45,7 +45,7 @@ exports.reset = function (event) {
         database: 'wallet'
     });
     connection.connect();
-    var addSql = 'TRUNCATE table money';
+    var addSql = "delete from money where user = '" + user_id + "'";
     //建立
     connection.query(addSql, function (err, result) {
         if (err) {
@@ -59,7 +59,7 @@ exports.reset = function (event) {
 };
 
 //顯示金額
-exports.show_Money = function (event) {
+exports.show_Money = function (user_id, event) {
     var connection = mysql.createConnection({
         host: '127.0.0.1',
         user: 'root',
@@ -67,8 +67,8 @@ exports.show_Money = function (event) {
         database: 'wallet'
     });
     connection.connect();
-    var sql = 'SELECT sum(money) as total FROM money where type = 1';
-    var sql0 = 'SELECT sum(money) as total FROM money where type = 0';
+    var sql = "SELECT sum(money) as total FROM money where type = 1 where user = '" + user_id + "'";
+    var sql0 = "SELECT sum(money) as total FROM money where type = 0 where user = '" + user_id + "'";
     var mon_1;
     var mon_0;
     connection.query(sql, function (err, result, fields) {
@@ -92,7 +92,7 @@ exports.show_Money = function (event) {
         console.log(result);
         console.log('------------------------------------------------------------\n\n');
         mon_0 = result[0].total;
-        var t_mon = mon_1 + mon_0;
+        var t_mon = mon_1 - mon_0;
         var msg = '總共存:' + mon_1 + '\n' + '總共花:' + mon_0 + '\n餘額:' + t_mon;
         sendMsg(event, msg);
     });
