@@ -93,7 +93,7 @@ exports.show_Money = function (user_id, event) {
         console.log('------------------------------------------------------------\n\n');
         mon_0 = result[0].total;
         var t_mon = mon_1 - mon_0;
-        var msg = '總共存:' + mon_1 + '\n' + '總共花:' + mon_0 + '\n餘額:' + t_mon;
+        var msg = '[我的錢包]\n\n存:' + mon_1 + '\n' + '花:' + mon_0 + '\n---------\n餘額:' + t_mon;
         sendMsg(event, msg);
     });
     connection.end();
