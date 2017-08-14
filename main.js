@@ -6,6 +6,7 @@
 
 var linebot = require('linebot');
 var express = require('express');
+var fs = require('fs');
 var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
 var wallet = require('./wallet.js'); //錢包
 
@@ -46,10 +47,23 @@ bot.on('message', function (event) {
                 wallet.show_Money(user_id, event);
             } else if (msg.indexOf("清除") !== -1) {
                 //重新計算
-                wallet.reset(user_id,event);
+                wallet.reset(user_id, event);
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
-                sendMsg(event, robot_msg + msg);
+
+                fs.readfile('help.txt', function (error, content) { //讀取file.txt檔案的內容
+                    if (error) { //如果有錯誤就列印訊息並離開程式
+                        console.log('檔案讀取錯誤。');
+                    } else {
+                        //把檔案的內容輸出
+                        //注意content變數的類型不是一個字串（String）
+                        //而是一個Buffer物件，所以要用 Buffer.toString() 方法來
+                        //把這Buffer物件的內容變成一個字串，以作輸出。
+                        //下回教學會解釋Buffer物件是用來幹什麼的                   
+                        sendMsg(event, robot_msg + content.toString());
+                    }
+                });
+
             }
         }
     } catch (err) {
