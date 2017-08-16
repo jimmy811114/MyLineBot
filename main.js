@@ -48,7 +48,11 @@ bot.on('message', function (event) {
                 wallet.show_Money(user_id, event);
             } else if (msg.indexOf("儲存") !== -1) {
                 //儲存
-                member.saveMember(user_id,event)
+                member.saveMember(user_id, event);
+            } else if (msg.indexOf("913") !== -1) {
+                //913       
+                setTimeout(member.sendBus(event), 10000);
+                sendMsg(event, '913提醒啟動');
             } else if (msg.indexOf("清除") !== -1) {
                 //重新計算
                 wallet.reset(user_id, event);
