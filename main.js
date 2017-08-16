@@ -3,18 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+var mysql = require('mysql');
+var request = require("request");
 
 var linebot = require('linebot');
 var express = require('express');
 var fs = require('fs');
+var timer;
 var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
 var wallet = require('./wallet.js'); //錢包
 var member = require('./Member.js'); //會員
 
 var bot = linebot({
-    channelId: '1521465147',
-    channelSecret: '476e3f9b35b545260a24665d2de6dc08',
-    channelAccessToken: '/cgAZ98zBrTsEPVM+xNxIkW+QvL0Pb3uSObihBdHa1JVUjZZ5JTY0BjwX61pnCHN1nRKM+TTO49zM002X8zQaZcJr0LwsFCwtH+kG9PYVFlpqIFjyGnjNisGMgbHLEqvi401tq3ITxDOa/JdRQcI6AdB04t89/1O/w1cDnyilFU='
+    channelId: '1530553288',
+    channelSecret: 'e3706264cb1f29efc1139468825b3482',
+    channelAccessToken: 'b3opydEiDWolKryUMs7STk0rsSKkb+23DtyoRI058FuPyhXXRzTzStDFJZOqlF7ut1wv5V7Zb9UDGAJZuQb8nq2Ng2P/xXwSyJiXMZ4RzAkO9z1uF9EVaOtByhFGpeoMZnUeVSdKM5DAxzclGzlOZwdB04t89/1O/w1cDnyilFU='
 });
 
 bot.on('message', function (event) {
@@ -50,9 +53,13 @@ bot.on('message', function (event) {
                 //儲存
                 member.saveMember(user_id, event);
             } else if (msg.indexOf("913") !== -1) {
-                //913       
-                setTimeout(member.sendBus(event), 10000);
-                sendMsg(event, '913提醒啟動');
+                //913
+                getBus();
+                sendMsg(event, '913-->啟動');
+            } else if (msg.indexOf("停") !== -1) {
+                //913
+                clearTimeout(timer);
+                sendMsg(event, '913-->停止');
             } else if (msg.indexOf("清除") !== -1) {
                 //重新計算
                 wallet.reset(user_id, event);
@@ -78,10 +85,10 @@ bot.on('message', function (event) {
         sendMsg(event, '錯誤指令:' + err);
     }
 });
+        const app = express();
+        const linebotParser = bot.parser();
+        app.post('/', linebotParser);
 
-const app = express();
-const linebotParser = bot.parser();
-app.post('/', linebotParser);
 //因為 express 預設走 port 3000，而 heroku 上預設卻不是，要透過下列程式轉換
 var server = app.listen(process.env.PORT || 3000, function () {
     var port = server.address().port;
@@ -98,3 +105,49 @@ function sendMsg(event, msg) {
         console.log('error');
     });
 }
+
+function getBus() {
+    var url = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/NewTaipei/913?$top=100&$format=JSON";
+    var connection = mysql.createConnection({
+        host: '127.0.0.1',
+        user: 'root',
+        password: 'x22122327',
+        database: 'wallet'
+    });
+    connection.connect();
+    var sql = "SELECT uuid FROM member";
+    connection.query(sql, function (err, result, fields) {
+        if (err) {
+            console.log('[SELECT ERROR] - ', err.message);
+            return;
+        }
+        for (var i = 0; i < result.length; i++) {
+            var uuid = result[i].uuid;
+            request(url, function (error, response, body) {
+                if (!error) {
+                    var obj = JSON.parse(body);
+                    for (var i = 0; i < obj.length; i++) {
+                        var obj_s = obj[i];
+                        if (obj_s.StopID === '19591') {
+                            var stop = obj_s.StopName;
+                            var time = obj_s.EstimateTime;
+                            var min = parseInt(time / 60);
+                            var sec = time % 60;
+                            var result = min + ':' + sec;
+                            var stop_name = stop.Zh_tw;
+                            var msg = stop_name + '到站時間：\n' + result;
+                            bot.push(uuid, msg);
+                            console.log('uuid:' + uuid);
+                            timer = setInterval(getBus, 30000);
+                        }
+                    }
+                } else {
+                    console.log('weather_error');
+                }
+            });
+        }
+    }
+    );
+}
+;
+console.log('start');
