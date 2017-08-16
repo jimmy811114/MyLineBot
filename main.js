@@ -54,7 +54,7 @@ bot.on('message', function (event) {
                 member.saveMember(user_id, event);
             } else if (msg.indexOf("913") !== -1) {
                 //913
-                getBus();
+                timer = setInterval(getBus, 5000);
                 sendMsg(event, '913-->啟動');
             } else if (msg.indexOf("停") !== -1) {
                 //913
@@ -133,12 +133,11 @@ function getBus() {
                             var time = obj_s.EstimateTime;
                             var min = parseInt(time / 60);
                             var sec = time % 60;
-                            var result = min + ':' + sec;
+                            var result = min + '分' + sec + '秒';
                             var stop_name = stop.Zh_tw;
                             var msg = stop_name + '到站時間：\n' + result;
                             bot.push(uuid, msg);
                             console.log('uuid:' + uuid);
-                            timer = setInterval(getBus, 30000);
                         }
                     }
                 } else {
