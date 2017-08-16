@@ -9,6 +9,7 @@ var express = require('express');
 var fs = require('fs');
 var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
 var wallet = require('./wallet.js'); //錢包
+var member = require('./Member.js'); //會員
 
 var bot = linebot({
     channelId: '1521465147',
@@ -45,6 +46,9 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("錢") !== -1) {
                 //顯示錢
                 wallet.show_Money(user_id, event);
+            } else if (msg.indexOf("儲存") !== -1) {
+                //儲存
+                member.saveMember(user_id,event)
             } else if (msg.indexOf("清除") !== -1) {
                 //重新計算
                 wallet.reset(user_id, event);
