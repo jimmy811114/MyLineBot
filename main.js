@@ -9,10 +9,17 @@ var request = require("request");
 var linebot = require('linebot');
 var express = require('express');
 var fs = require('fs');
-var timer;
+var timer, timer2;
 var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
 var wallet = require('./wallet.js'); //錢包
 var member = require('./Member.js'); //會員
+
+var host_ip = "jimmyyang.ddns.net"; //資料庫IP
+
+var bus_stop_254 = "TPE17606";
+var url_254 = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Taipei/254?$top=100&$format=JSON";
+var bus_stop_913 = "NWT19549";
+var url_913 = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/NewTaipei/913?$top=100&$format=JSON";
 
 var bot = linebot({
     channelId: '1530553288',
@@ -54,15 +61,27 @@ bot.on('message', function (event) {
                 member.saveMember(user_id, event);
             } else if (msg.indexOf("913") !== -1) {
                 //913
-                timer = setInterval(getBus, 5000);
+                timer = setInterval(getBus(url_913, bus_stop_913), 30000);
                 sendMsg(event, '913-->啟動');
-            } else if (msg.indexOf("停") !== -1) {
-                //913
+            } else if (msg.indexOf("254") !== -1) {
+                //254
+                timer = setInterval(getBus(url_254, bus_stop_254), 30000);
+                sendMsg(event, '254-->啟動');
+            } else if (msg.indexOf("公車停") !== -1) {
+                //stop
                 clearTimeout(timer);
-                sendMsg(event, '913-->停止');
+                sendMsg(event, '公車-->停止');
             } else if (msg.indexOf("清除") !== -1) {
                 //重新計算
                 wallet.reset(user_id, event);
+            } else if (msg.indexOf("預報") !== -1) {
+                //預報天氣
+                timer2 = setInterval(getWeather(), 3600000);
+                sendMsg(event, '天氣預報-->啟動');
+            } else if (msg.indexOf("停止1") !== -1) {
+                //預報停止
+                clearTimeout(timer2);
+                sendMsg(event, '天氣預報停止');
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
 
@@ -78,16 +97,15 @@ bot.on('message', function (event) {
                         sendMsg(event, robot_msg + content.toString());
                     }
                 });
-
             }
         }
     } catch (err) {
-        sendMsg(event, '錯誤指令:' + err);
+        console.log(err);
     }
 });
-        const app = express();
-        const linebotParser = bot.parser();
-        app.post('/', linebotParser);
+const app = express();
+const linebotParser = bot.parser();
+app.post('/', linebotParser);
 
 //因為 express 預設走 port 3000，而 heroku 上預設卻不是，要透過下列程式轉換
 var server = app.listen(process.env.PORT || 3000, function () {
@@ -106,47 +124,92 @@ function sendMsg(event, msg) {
     });
 }
 
-function getBus() {
-    var url = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/NewTaipei/913?$top=100&$format=JSON";
-    var connection = mysql.createConnection({
-        host: '127.0.0.1',
-        user: 'root',
-        password: 'x22122327',
-        database: 'wallet'
-    });
-    connection.connect();
-    var sql = "SELECT uuid FROM member";
-    connection.query(sql, function (err, result, fields) {
-        if (err) {
-            console.log('[SELECT ERROR] - ', err.message);
-            return;
-        }
-        for (var i = 0; i < result.length; i++) {
-            var uuid = result[i].uuid;
-            request(url, function (error, response, body) {
-                if (!error) {
-                    var obj = JSON.parse(body);
-                    for (var i = 0; i < obj.length; i++) {
-                        var obj_s = obj[i];
-                        if (obj_s.StopID === '19591') {
-                            var stop = obj_s.StopName;
-                            var time = obj_s.EstimateTime;
-                            var min = parseInt(time / 60);
-                            var sec = time % 60;
-                            var result = min + '分' + sec + '秒';
-                            var stop_name = stop.Zh_tw;
-                            var msg = stop_name + '到站時間：\n' + result;
-                            bot.push(uuid, msg);
-                            console.log('uuid:' + uuid);
+function getBus(bus_url, stop_uid) {
+    return function () {
+        var connection = mysql.createConnection({
+            host: host_ip,
+            user: 'root',
+            password: 'x22122327',
+            database: 'wallet'
+        });
+        connection.connect();
+        var sql = "SELECT uuid FROM member";
+        connection.query(sql, function (err, result, fields) {
+            if (err) {
+                console.log('[SELECT ERROR] - ', err.message);
+                return;
+            }
+            for (var i = 0; i < result.length; i++) {
+                var uuid = result[i].uuid;
+                request(bus_url, function (error, response, body) {
+                    if (!error) {
+                        var obj = JSON.parse(body);
+                        var check = false;
+                        for (var i = 0; i < obj.length; i++) {
+                            var obj_s = obj[i];
+                            if (obj_s.StopUID === stop_uid) {
+                                check = true;
+                                var stop = obj_s.StopName;
+                                var time = obj_s.EstimateTime;
+                                var min = parseInt(time / 60);
+                                var sec = time % 60;
+                                var result = min + '分' + sec + '秒';
+                                var stop_name = stop.Zh_tw;
+                                var msg = result + '將到站\n' + stop_name;
+                                bot.push(uuid, msg);
+                                console.log('uuid:' + uuid);
+                            }
                         }
+                        if (!check) {
+                            bot.push(uuid, '目前尚未發車喔！');
+                        }
+                    } else {
+                        console.log('weather_error');
                     }
-                } else {
-                    console.log('weather_error');
-                }
-            });
-        }
-    }
-    );
+                });
+            }
+        });
+        console.log('bus_check');
+    };
 }
-;
-console.log('start');
+
+
+//天氣
+function getWeather() {
+    return function () {
+        var url = "https://works.ioa.tw/weather/api/weathers/4.json";
+        var connection = mysql.createConnection({
+            host: host_ip,
+            user: 'root',
+            password: 'x22122327',
+            database: 'wallet'
+        });
+        connection.connect();
+        var sql = "SELECT uuid FROM member";
+        connection.query(sql, function (err, result, fields) {
+            if (err) {
+                console.log('[SELECT ERROR] - ', err.message);
+                return;
+            }
+            for (var i = 0; i < result.length; i++) {
+                var uuid = result[i].uuid;
+                request(url, function (error, response, body) {
+                    if (!error) {
+                        var obj = JSON.parse(body);
+                        var w_msg = obj.desc;
+//                        if (w_msg.indexOf("雨") !== -1) {
+                            bot.push(uuid, '公司那邊可能要下雨了喔!\n訊息:' + w_msg);
+                            console.log('uuid:' + uuid);
+//                        }
+                    } else {
+                        console.log('weather_error');
+                    }
+                });
+            }
+        });
+        console.log('weather_check');
+    };
+}
+
+
+timer2 = setInterval(getWeather(), 1800000);
