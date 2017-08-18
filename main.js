@@ -9,6 +9,7 @@ var cheerio = require("cheerio");
 var linebot = require('linebot');
 var express = require('express');
 var fs = require('fs');
+var schedule = require('node-schedule');
 
 
 var timer, timer2, timer3; //各項時程發送
@@ -97,7 +98,7 @@ bot.on('message', function (event) {
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '1'});
             } else if (msg.indexOf("通知") !== -1) {
                 //通知
-                sendAll(msg);
+                sendAll(msg, 4);
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
                 fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
@@ -110,7 +111,7 @@ bot.on('message', function (event) {
                         //把這Buffer物件的內容變成一個字串，以作輸出。
                         //下回教學會解釋Buffer物件是用來幹什麼的                   
                         sendMsg(event, robot_msg + content.toString());
-                        bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '9'});
+                        bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '9'});//9
                     }
                 });
             }
@@ -140,7 +141,7 @@ function sendMsg(event, msg) {
 
 
 //傳給大家
-function sendAll(msg) {
+function sendAll(msg, count) {
     var connection = mysql.createConnection({
         host: host_ip,
         user: 'root',
@@ -156,7 +157,7 @@ function sendAll(msg) {
         }
         for (var i = 0; i < result.length; i++) {
             var uuid = result[i].uuid;
-            bot.push(uuid, {type: 'sticker', packageId: '1', stickerId: '4'});
+            bot.push(uuid, {type: 'sticker', packageId: '1', stickerId: count});
             bot.push(uuid, msg);
         }
     });
@@ -442,3 +443,56 @@ timer2 = setInterval(getWeather(), 3600000);
 timer3 = setInterval(getNew(), 7200000);
 console.log('Start: weather');
 console.log('Start: news');
+
+//-------------------------------------------排程
+//早安
+var rule = new schedule.RecurrenceRule();
+rule.hour = 9;
+rule.minute = 0;
+rule.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
+var job = new schedule.scheduleJob(rule, function () {
+    // do jobs here 
+    var msg = '早安喔~要準備上班了，加油!';
+    sendAll(msg, 5);
+});
+//午安
+var rule2 = new schedule.RecurrenceRule();
+rule2.hour = 12;
+rule2.minute = 0;
+rule2.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
+var job2 = new schedule.scheduleJob(rule2, function () {
+    // do jobs here 
+    var msg = '午安呀!記得吃午餐喔';
+    sendAll(msg, 2);
+});
+//下班
+var rule3 = new schedule.RecurrenceRule();
+rule3.hour = 18;
+rule3.minute = 0;
+rule3.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
+var job3 = new schedule.scheduleJob(rule3, function () {
+    // do jobs here 
+    var msg = '準備下班了~辛苦囉';
+    sendAll(msg, 11);
+});
+//睡覺
+var rule4 = new schedule.RecurrenceRule();
+rule4.hour = 23;
+rule4.minute = 0;
+rule4.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
+var job4 = new schedule.scheduleJob(rule4, function () {
+    // do jobs here 
+    var msg = '準備睡覺囉~晚安';
+    sendAll(msg, 1);
+});
+//星期日
+var rule5 = new schedule.RecurrenceRule();
+rule5.hour = 23;
+rule5.minute = 0;
+rule5.dayOfWeek = [0]; // 每星期日.四~六的下午5點0分
+var job5 = new schedule.scheduleJob(rule5, function () {
+    // do jobs here 
+    var msg = '明天要上班了~收心睡覺吧~';
+    sendAll(msg, 2);
+});
+console.log('Start: schedule');
