@@ -293,3 +293,9 @@ timer2 = setInterval(getWeather(), 3600000);
 
 //新聞
 timer3 = setInterval(getNew(), 7200000);
+
+getWeather();
+getNew();
+
+console.log('Start: weather');
+console.log('Start: news');
