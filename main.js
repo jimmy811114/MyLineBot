@@ -114,16 +114,14 @@ bot.on('message', function (event) {
         console.log(err);
     }
 });
-const app = express();
-const linebotParser = bot.parser();
-app.post('/', linebotParser);
-
+        const app = express();
+        const linebotParser = bot.parser();
+        app.post('/', linebotParser);
 //因為 express 預設走 port 3000，而 heroku 上預設卻不是，要透過下列程式轉換
 var server = app.listen(process.env.PORT || 3000, function () {
     var port = server.address().port;
     console.log("App now running on port", port);
 });
-
 //傳送訊息
 function sendMsg(event, msg) {
     event.reply(msg).then(function (data) {
@@ -135,50 +133,6 @@ function sendMsg(event, msg) {
     });
 }
 
-function getBus(bus_url, stop_uid) {
-    return function () {
-        request(bus_url, function (error, response, body) {
-            if (!error) {
-                var obj = JSON.parse(body);
-                for (var i = 0; i < obj.length; i++) {
-                    var obj_s = obj[i];
-                    if (obj_s.StopUID === stop_uid) {
-                        var stop = obj_s.StopName;
-                        var time = obj_s.EstimateTime;
-                        var min = parseInt(time / 60);
-                        var sec = time % 60;
-                        var result = min + '分' + sec + '秒';
-                        var stop_name = stop.Zh_tw;
-                        var msg = result + '將到站\n' + stop_name;
-                        var connection = mysql.createConnection({
-                            host: host_ip,
-                            user: 'root',
-                            password: 'x22122327',
-                            database: 'wallet'
-                        });
-                        connection.connect();
-                        var sql = "SELECT uuid FROM member";
-                        connection.query(sql, function (err, result, fields) {
-                            if (err) {
-                                console.log('[SELECT ERROR] - ', err.message);
-                                return;
-                            }
-                            for (var i = 0; i < result.length; i++) {
-                                var uuid = result[i].uuid;
-                                bot.push(uuid, msg);
-                                console.log('uuid:' + uuid);
-                            }
-                        });
-                        console.log('bus_check');
-                    }
-                }
-            } else {
-                console.log('bus_error');
-            }
-        });
-
-    };
-}
 
 //傳給大家
 function sendAll(msg) {
@@ -202,11 +156,12 @@ function sendAll(msg) {
     });
 }
 
+//-------------------------------------------顯示資料 
 //天氣
 function getWeather() {
     return function () {
-        var url = "https://works.ioa.tw/weather/api/weathers/4.json";
-        request(url, function (error, response, body) {
+        var url2 = "https://works.ioa.tw/weather/api/weathers/4.json";
+        request(url2, function (error, response, body) {
             if (!error) {
                 var obj = JSON.parse(body);
                 var w_msg = obj.desc;
@@ -237,7 +192,7 @@ function getWeather() {
     };
 }
 
-//天氣
+//新聞
 function getNew() {
     return function () {
         var url = "http://www.chinatimes.com/hotnews/click";
@@ -283,13 +238,64 @@ function getNew() {
                 console.log('news_error');
             }
         });
-
         console.log('news_check');
+    };
+}
+
+//公車
+function getBus(bus_url, stop_uid) {
+    return function () {
+        request(bus_url, function (error, response, body) {
+            if (!error) {
+                var obj = JSON.parse(body);
+                for (var i = 0; i < obj.length; i++) {
+                    var obj_s = obj[i];
+                    if (obj_s.StopUID === stop_uid) {
+                        var stop = obj_s.StopName;
+                        var time = obj_s.EstimateTime;
+                        var min = parseInt(time / 60);
+                        var sec = time % 60;
+                        var result = min + '分' + sec + '秒';
+                        var stop_name = stop.Zh_tw;
+                        var msg = result + '將到站\n' + stop_name;
+                        var connection = mysql.createConnection({
+                            host: host_ip,
+                            user: 'root',
+                            password: 'x22122327',
+                            database: 'wallet'
+                        });
+                        connection.connect();
+                        var sql = "SELECT uuid FROM member";
+                        connection.query(sql, function (err, result, fields) {
+                            if (err) {
+                                console.log('[SELECT ERROR] - ', err.message);
+                                return;
+                            }
+                            for (var i = 0; i < result.length; i++) {
+                                var uuid = result[i].uuid;
+                                bot.push(uuid, msg);
+                                console.log('uuid:' + uuid);
+                            }
+                        });
+                        console.log('bus_check');
+                    }
+                }
+            } else {
+                console.log('bus_error');
+            }
+        });
     };
 }
 
 //顯示預報資料
 function showURL_DATA() {
+    sendNews();
+    sendWeather();
+}
+
+//------------------------------------------送出訊息
+//新聞
+function sendNews() {
     var url = "http://www.chinatimes.com/hotnews/click";
     request(url, function (error, response, body) {
         if (!error) {
@@ -333,10 +339,13 @@ function showURL_DATA() {
             console.log('news_error');
         }
     });
+    console.log('news_check');
+}
 
-
-    var url = "https://works.ioa.tw/weather/api/weathers/4.json";
-    request(url, function (error, response, body) {
+//氣象
+function sendWeather() {
+    var url2 = "https://works.ioa.tw/weather/api/weathers/4.json";
+    request(url2, function (error, response, body) {
         if (!error) {
             var obj = JSON.parse(body);
             var w_msg = obj.desc;
@@ -364,15 +373,55 @@ function showURL_DATA() {
         }
     });
     console.log('weather_check');
-    console.log('check');
 }
 
+//公車
+function sendBus(bus_url, stop_uid) {
+    request(bus_url, function (error, response, body) {
+        if (!error) {
+            var obj = JSON.parse(body);
+            for (var i = 0; i < obj.length; i++) {
+                var obj_s = obj[i];
+                if (obj_s.StopUID === stop_uid) {
+                    var stop = obj_s.StopName;
+                    var time = obj_s.EstimateTime;
+                    var min = parseInt(time / 60);
+                    var sec = time % 60;
+                    var result = min + '分' + sec + '秒';
+                    var stop_name = stop.Zh_tw;
+                    var msg = result + '將到站\n' + stop_name;
+                    var connection = mysql.createConnection({
+                        host: host_ip,
+                        user: 'root',
+                        password: 'x22122327',
+                        database: 'wallet'
+                    });
+                    connection.connect();
+                    var sql = "SELECT uuid FROM member";
+                    connection.query(sql, function (err, result, fields) {
+                        if (err) {
+                            console.log('[SELECT ERROR] - ', err.message);
+                            return;
+                        }
+                        for (var i = 0; i < result.length; i++) {
+                            var uuid = result[i].uuid;
+                            bot.push(uuid, msg);
+                            console.log('uuid:' + uuid);
+                        }
+                    });
+                    console.log('bus_check');
+                }
+            }
+        } else {
+            console.log('bus_error');
+        }
+    });
+}
+//------------------------------------------送出訊息
 
 //氣象
 timer2 = setInterval(getWeather(), 3600000);
-
 //新聞
 timer3 = setInterval(getNew(), 7200000);
-
 console.log('Start: weather');
 console.log('Start: news');
