@@ -278,6 +278,7 @@ function getNew() {
                             count++;
                             msg_result += count + '. ' + String($(this).text()).trim() + '\n';
                         });
+                        msg_result += url;
                         bot.push(uuid, msg_result);
                         console.log('uuid:' + uuid);
                     } else {
@@ -339,6 +340,7 @@ function showURL_DATA() {
                         count++;
                         msg_result += count + '. ' + String($(this).text()).trim() + '\n';
                     });
+                    msg_result += url2;
                     bot.push(uuid, msg_result);
                     console.log('uuid:' + uuid);
                 } else {
