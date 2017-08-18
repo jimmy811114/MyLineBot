@@ -271,7 +271,7 @@ function getBus(bus_url, stop_uid) {
                             database: 'wallet'
                         });
                         connection.connect();
-                        var sql = "SELECT uuid FROM member";
+                        var sql = "SELECT uuid FROM member where bus = 1";
                         connection.query(sql, function (err, result, fields) {
                             if (err) {
                                 console.log('[SELECT ERROR] - ', err.message);
@@ -408,7 +408,7 @@ function sendBus(bus_url, stop_uid) {
                         database: 'wallet'
                     });
                     connection.connect();
-                    var sql = "SELECT uuid FROM member";
+                    var sql = "SELECT uuid FROM member where bus = 1";
                     connection.query(sql, function (err, result, fields) {
                         if (err) {
                             console.log('[SELECT ERROR] - ', err.message);
