@@ -506,4 +506,14 @@ var job5 = new schedule.scheduleJob(rule5, function () {
     var msg = '明天要上班了~收心睡覺吧~';
     sendAll(msg, 2);
 });
+//起床
+var rule6 = new schedule.RecurrenceRule();
+rule6.hour = 9;
+rule6.minute = 0;
+rule6.dayOfWeek = [0, 6]; // 每星期日.四~六的下午5點0分
+var job6 = new schedule.scheduleJob(rule6, function () {
+    // do jobs here 
+    var msg = '早安喔~起床啦!';
+    sendAll(msg, 2);
+});
 console.log('Start: schedule');
