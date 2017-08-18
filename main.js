@@ -16,7 +16,7 @@ var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
 var wallet = require('./wallet.js'); //錢包
 var member = require('./Member.js'); //會員
 
-var host_ip = "jimmyyang.ddns.net"; //資料庫IP
+var host_ip = "127.0.0.1"; //資料庫IP
 
 var bus_stop_254 = "TPE17606";
 var url_254 = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Taipei/254?$top=100&$format=JSON";
@@ -137,50 +137,46 @@ function sendMsg(event, msg) {
 
 function getBus(bus_url, stop_uid) {
     return function () {
-        var connection = mysql.createConnection({
-            host: host_ip,
-            user: 'root',
-            password: 'x22122327',
-            database: 'wallet'
-        });
-        connection.connect();
-        var sql = "SELECT uuid FROM member";
-        connection.query(sql, function (err, result, fields) {
-            if (err) {
-                console.log('[SELECT ERROR] - ', err.message);
-                return;
-            }
-            for (var i = 0; i < result.length; i++) {
-                var uuid = result[i].uuid;
-                request(bus_url, function (error, response, body) {
-                    if (!error) {
-                        var obj = JSON.parse(body);
-                        var check = false;
-                        for (var i = 0; i < obj.length; i++) {
-                            var obj_s = obj[i];
-                            if (obj_s.StopUID === stop_uid) {
-                                check = true;
-                                var stop = obj_s.StopName;
-                                var time = obj_s.EstimateTime;
-                                var min = parseInt(time / 60);
-                                var sec = time % 60;
-                                var result = min + '分' + sec + '秒';
-                                var stop_name = stop.Zh_tw;
-                                var msg = result + '將到站\n' + stop_name;
+        request(bus_url, function (error, response, body) {
+            if (!error) {
+                var obj = JSON.parse(body);
+                for (var i = 0; i < obj.length; i++) {
+                    var obj_s = obj[i];
+                    if (obj_s.StopUID === stop_uid) {
+                        var stop = obj_s.StopName;
+                        var time = obj_s.EstimateTime;
+                        var min = parseInt(time / 60);
+                        var sec = time % 60;
+                        var result = min + '分' + sec + '秒';
+                        var stop_name = stop.Zh_tw;
+                        var msg = result + '將到站\n' + stop_name;
+                        var connection = mysql.createConnection({
+                            host: host_ip,
+                            user: 'root',
+                            password: 'x22122327',
+                            database: 'wallet'
+                        });
+                        connection.connect();
+                        var sql = "SELECT uuid FROM member";
+                        connection.query(sql, function (err, result, fields) {
+                            if (err) {
+                                console.log('[SELECT ERROR] - ', err.message);
+                                return;
+                            }
+                            for (var i = 0; i < result.length; i++) {
+                                var uuid = result[i].uuid;
                                 bot.push(uuid, msg);
                                 console.log('uuid:' + uuid);
                             }
-                        }
-                        if (!check) {
-                            bot.push(uuid, '目前尚未發車喔！');
-                        }
-                    } else {
-                        console.log('weather_error');
+                        });
+                        console.log('bus_check');
                     }
-                });
+                }
+            } else {
+                console.log('bus_error');
             }
         });
-        console.log('bus_check');
+
     };
 }
 
@@ -210,31 +206,31 @@ function sendAll(msg) {
 function getWeather() {
     return function () {
         var url = "https://works.ioa.tw/weather/api/weathers/4.json";
-        var connection = mysql.createConnection({
-            host: host_ip,
-            user: 'root',
-            password: 'x22122327',
-            database: 'wallet'
-        });
-        connection.connect();
-        var sql = "SELECT uuid FROM member";
-        connection.query(sql, function (err, result, fields) {
-            if (err) {
-                console.log('[SELECT ERROR] - ', err.message);
-                return;
-            }
-            for (var i = 0; i < result.length; i++) {
-                var uuid = result[i].uuid;
-                request(url, function (error, response, body) {
-                    if (!error) {
-                        var obj = JSON.parse(body);
-                        var w_msg = obj.desc;
+        request(url, function (error, response, body) {
+            if (!error) {
+                var obj = JSON.parse(body);
+                var w_msg = obj.desc;
+                var connection = mysql.createConnection({
+                    host: host_ip,
+                    user: 'root',
+                    password: 'x22122327',
+                    database: 'wallet'
+                });
+                connection.connect();
+                var sql = "SELECT uuid FROM member";
+                connection.query(sql, function (err, result, fields) {
+                    if (err) {
+                        console.log('[SELECT ERROR] - ', err.message);
+                        return;
+                    }
+                    for (var i = 0; i < result.length; i++) {
+                        var uuid = result[i].uuid;
                         bot.push(uuid, w_msg);
                         console.log('uuid:' + uuid);
-                    } else {
-                        console.log('weather_error');
                     }
                 });
+            } else {
+                console.log('weather_error');
             }
         });
         console.log('weather_check');
@@ -244,111 +240,130 @@ function getWeather() {
 //天氣
 function getNew() {
     return function () {
-        var connection = mysql.createConnection({
-            host: host_ip,
-            user: 'root',
-            password: 'x22122327',
-            database: 'wallet'
-        });
-        connection.connect();
-        var sql = "SELECT uuid FROM member";
-        connection.query(sql, function (err, result, fields) {
-            if (err) {
-                console.log('[SELECT ERROR] - ', err.message);
-                return;
-            }
-            for (var i = 0; i < result.length; i++) {
-                var uuid = result[i].uuid;
-                var url = "http://www.chinatimes.com/hotnews/click";
-                request(url, function (error, response, body) {
-                    if (!error) {
-                        // 用 cheerio 解析 html 資料
-                        var $ = cheerio.load(body);
-                        // 篩選有興趣的資料
-                        var NowDate = new Date();
-                        var y = NowDate.getFullYear();
-                        var mm = NowDate.getMonth() + 1;
-                        var d = NowDate.getDate();
-                        var h = NowDate.getHours();
-                        var m = NowDate.getMinutes();
-                        var time = y + '年' + mm + '月' + d + '日 ' + h + ':' + m;
-                        var msg_result = time + '\n';
-                        var count = 0;
-                        $('.ga-list ul li h2').each(function (i, elem) {
-                            count++;
-                            msg_result += count + '. ' + String($(this).text()).trim() + '\n';
-                        });
-                        msg_result += url;
+        var url = "http://www.chinatimes.com/hotnews/click";
+        request(url, function (error, response, body) {
+            if (!error) {
+                // 用 cheerio 解析 html 資料
+                var $ = cheerio.load(body);
+                // 篩選有興趣的資料
+                var NowDate = new Date();
+                var y = NowDate.getFullYear();
+                var mm = NowDate.getMonth() + 1;
+                var d = NowDate.getDate();
+                var h = NowDate.getHours();
+                var m = NowDate.getMinutes();
+                var time = y + '年' + mm + '月' + d + '日 ' + h + ':' + m;
+                var msg_result = time + '\n';
+                var count = 0;
+                $('.ga-list ul li h2').each(function (i, elem) {
+                    count++;
+                    msg_result += count + '. ' + String($(this).text()).trim() + '\n';
+                });
+                msg_result += url;
+                var connection = mysql.createConnection({
+                    host: host_ip,
+                    user: 'root',
+                    password: 'x22122327',
+                    database: 'wallet'
+                });
+                connection.connect();
+                var sql = "SELECT uuid FROM member";
+                connection.query(sql, function (err, result, fields) {
+                    if (err) {
+                        console.log('[SELECT ERROR] - ', err.message);
+                        return;
+                    }
+                    for (var i = 0; i < result.length; i++) {
+                        var uuid = result[i].uuid;
                         bot.push(uuid, msg_result);
                         console.log('uuid:' + uuid);
-                    } else {
-                        console.log('news_error');
                     }
                 });
+            } else {
+                console.log('news_error');
             }
         });
+
         console.log('news_check');
     };
 }
 
 //顯示預報資料
 function showURL_DATA() {
-    var url = "https://works.ioa.tw/weather/api/weathers/4.json";
-    var url2 = "http://www.chinatimes.com/hotnews/click";
-    var connection = mysql.createConnection({
-        host: host_ip,
-        user: 'root',
-        password: 'x22122327',
-        database: 'wallet'
-    });
-    connection.connect();
-    var sql = "SELECT uuid FROM member";
-    connection.query(sql, function (err, result, fields) {
-        if (err) {
-            console.log('[SELECT ERROR] - ', err.message);
-            return;
-        }
-        for (var i = 0; i < result.length; i++) {
-            var uuid = result[i].uuid;
-            request(url, function (error, response, body) {
-                if (!error) {
-                    var obj = JSON.parse(body);
-                    var w_msg = obj.desc;
-                    bot.push(uuid, w_msg);
-                    console.log('uuid:' + uuid);
-                } else {
-                    console.log('weather_error');
-                }
+    var url = "http://www.chinatimes.com/hotnews/click";
+    request(url, function (error, response, body) {
+        if (!error) {
+            // 用 cheerio 解析 html 資料
+            var $ = cheerio.load(body);
+            // 篩選有興趣的資料
+            var NowDate = new Date();
+            var y = NowDate.getFullYear();
+            var mm = NowDate.getMonth() + 1;
+            var d = NowDate.getDate();
+            var h = NowDate.getHours();
+            var m = NowDate.getMinutes();
+            var time = y + '年' + mm + '月' + d + '日 ' + h + ':' + m;
+            var msg_result = time + '\n';
+            var count = 0;
+            $('.ga-list ul li h2').each(function (i, elem) {
+                count++;
+                msg_result += count + '. ' + String($(this).text()).trim() + '\n';
             });
-
-
-            request(url2, function (error, response, body) {
-                if (!error) {
-                    // 用 cheerio 解析 html 資料
-                    var $ = cheerio.load(body);
-                    // 篩選有興趣的資料
-                    var NowDate = new Date();
-                    var y = NowDate.getFullYear();
-                    var mm = NowDate.getMonth() + 1;
-                    var d = NowDate.getDate();
-                    var h = NowDate.getHours();
-                    var m = NowDate.getMinutes();
-                    var time = y + '年' + mm + '月' + d + '日 ' + h + ':' + m;
-                    var msg_result = time + '\n';
-                    var count = 0;
-                    $('.ga-list ul li h2').each(function (i, elem) {
-                        count++;
-                        msg_result += count + '. ' + String($(this).text()).trim() + '\n';
-                    });
-                    msg_result += url2;
+            msg_result += url;
+            var connection = mysql.createConnection({
+                host: host_ip,
+                user: 'root',
+                password: 'x22122327',
+                database: 'wallet'
+            });
+            connection.connect();
+            var sql = "SELECT uuid FROM member";
+            connection.query(sql, function (err, result, fields) {
+                if (err) {
+                    console.log('[SELECT ERROR] - ', err.message);
+                    return;
+                }
+                for (var i = 0; i < result.length; i++) {
+                    var uuid = result[i].uuid;
                     bot.push(uuid, msg_result);
                     console.log('uuid:' + uuid);
-                } else {
-                    console.log('news_error');
                 }
             });
+        } else {
+            console.log('news_error');
         }
     });
+
+
+    var url = "https://works.ioa.tw/weather/api/weathers/4.json";
+    request(url, function (error, response, body) {
+        if (!error) {
+            var obj = JSON.parse(body);
+            var w_msg = obj.desc;
+            var connection = mysql.createConnection({
+                host: host_ip,
+                user: 'root',
+                password: 'x22122327',
+                database: 'wallet'
+            });
+            connection.connect();
+            var sql = "SELECT uuid FROM member";
+            connection.query(sql, function (err, result, fields) {
+                if (err) {
+                    console.log('[SELECT ERROR] - ', err.message);
+                    return;
+                }
+                for (var i = 0; i < result.length; i++) {
+                    var uuid = result[i].uuid;
+                    bot.push(uuid, w_msg);
+                    console.log('uuid:' + uuid);
+                }
+            });
+        } else {
+            console.log('weather_error');
+        }
+    });
+    console.log('weather_check');
     console.log('check');
 }
 
