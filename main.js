@@ -65,14 +65,17 @@ bot.on('message', function (event) {
                 //913
                 timer = setInterval(getBus(url_913, bus_stop_913), 30000);
                 sendMsg(event, '913-->啟動');
+                bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '12'});
             } else if (msg.indexOf("254") !== -1) {
                 //254
                 timer = setInterval(getBus(url_254, bus_stop_254), 30000);
                 sendMsg(event, '254-->啟動');
+                bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '12'});
             } else if (msg.indexOf("公車停") !== -1) {
                 //stop
                 clearTimeout(timer);
                 sendMsg(event, '公車-->停止');
+                bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '1'});
             } else if (msg.indexOf("清除") !== -1) {
                 //重新計算
                 wallet.reset(user_id, event);
@@ -91,6 +94,7 @@ bot.on('message', function (event) {
                 clearTimeout(timer2);
                 clearTimeout(timer3);
                 sendMsg(event, '預報停止');
+                bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '1'});
             } else if (msg.indexOf("通知") !== -1) {
                 //通知
                 sendAll(msg);
@@ -106,6 +110,7 @@ bot.on('message', function (event) {
                         //把這Buffer物件的內容變成一個字串，以作輸出。
                         //下回教學會解釋Buffer物件是用來幹什麼的                   
                         sendMsg(event, robot_msg + content.toString());
+                        bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '9'});
                     }
                 });
             }
@@ -151,6 +156,7 @@ function sendAll(msg) {
         }
         for (var i = 0; i < result.length; i++) {
             var uuid = result[i].uuid;
+            bot.push(uuid, {type: 'sticker', packageId: '1', stickerId: '4'});
             bot.push(uuid, msg);
         }
     });
