@@ -164,7 +164,13 @@ function getWeather() {
         request(url2, function (error, response, body) {
             if (!error) {
                 var obj = JSON.parse(body);
-                var w_msg = obj.desc;
+                var obj = JSON.parse(body);
+                var desc = obj.desc;
+                var temperature = obj.temperature;
+                var felt_air_temp = obj.felt_air_temp;
+                var rainfall = obj.rainfall;
+                var sunset = obj.sunset;
+                var w_msg = desc + '\n溫度:' + temperature + '\n體感:' + felt_air_temp + '\n降雨機率:' + rainfall + '\n日落時間:' + sunset;
                 var connection = mysql.createConnection({
                     host: host_ip,
                     user: 'root',
@@ -348,7 +354,12 @@ function sendWeather() {
     request(url2, function (error, response, body) {
         if (!error) {
             var obj = JSON.parse(body);
-            var w_msg = obj.desc;
+            var desc = obj.desc;
+            var temperature = obj.temperature;
+            var felt_air_temp = obj.felt_air_temp;
+            var rainfall = obj.rainfall;
+            var sunset = obj.sunset;
+            var w_msg = desc + '\n溫度:' + temperature + '\n體感:' + felt_air_temp + '\n降雨機率:' + rainfall + '\n日落時間:' + sunset;
             var connection = mysql.createConnection({
                 host: host_ip,
                 user: 'root',
