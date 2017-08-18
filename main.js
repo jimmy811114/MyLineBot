@@ -82,8 +82,7 @@ bot.on('message', function (event) {
                 clearTimeout(timer3);
                 var weather_sec = 3600 * 1000;
                 var news_sec = 7200 * 1000;
-                getWeather();
-                getNew();
+                showURL_DATA();
                 timer2 = setInterval(getWeather(), weather_sec);
                 timer3 = setInterval(getNew(), news_sec);
                 sendMsg(event, '預報-->啟動');
@@ -289,6 +288,66 @@ function getNew() {
         });
         console.log('news_check');
     };
+}
+
+//顯示預報資料
+function showURL_DATA() {
+    var url = "https://works.ioa.tw/weather/api/weathers/4.json";
+    var url2 = "http://www.chinatimes.com/hotnews/click";
+    var connection = mysql.createConnection({
+        host: host_ip,
+        user: 'root',
+        password: 'x22122327',
+        database: 'wallet'
+    });
+    connection.connect();
+    var sql = "SELECT uuid FROM member";
+    connection.query(sql, function (err, result, fields) {
+        if (err) {
+            console.log('[SELECT ERROR] - ', err.message);
+            return;
+        }
+        for (var i = 0; i < result.length; i++) {
+            var uuid = result[i].uuid;
+            request(url, function (error, response, body) {
+                if (!error) {
+                    var obj = JSON.parse(body);
+                    var w_msg = obj.desc;
+                    bot.push(uuid, w_msg);
+                    console.log('uuid:' + uuid);
+                } else {
+                    console.log('weather_error');
+                }
+            });
+
+
+            request(url2, function (error, response, body) {
+                if (!error) {
+                    // 用 cheerio 解析 html 資料
+                    var $ = cheerio.load(body);
+                    // 篩選有興趣的資料
+                    var NowDate = new Date();
+                    var y = NowDate.getFullYear();
+                    var mm = NowDate.getMonth() + 1;
+                    var d = NowDate.getDate();
+                    var h = NowDate.getHours();
+                    var m = NowDate.getMinutes();
+                    var time = y + '年' + mm + '月' + d + '日 ' + h + ':' + m;
+                    var msg_result = time + '\n';
+                    var count = 0;
+                    $('.ga-list ul li h2').each(function (i, elem) {
+                        count++;
+                        msg_result += count + '. ' + String($(this).text()).trim() + '\n';
+                    });
+                    bot.push(uuid, msg_result);
+                    console.log('uuid:' + uuid);
+                } else {
+                    console.log('news_error');
+                }
+            });
+        }
+    });
+    console.log('check');
 }
 
 
