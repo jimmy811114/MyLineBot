@@ -88,6 +88,9 @@ bot.on('message', function (event) {
                 clearTimeout(timer2);
                 clearTimeout(timer3);
                 sendMsg(event, '預報停止');
+            } else if (msg.indexOf("通知") !== -1) {
+                //通知
+                sendAll(msg);
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
                 fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
@@ -178,6 +181,27 @@ function getBus(bus_url, stop_uid) {
     };
 }
 
+//傳給大家
+function sendAll(msg) {
+    var connection = mysql.createConnection({
+        host: host_ip,
+        user: 'root',
+        password: 'x22122327',
+        database: 'wallet'
+    });
+    connection.connect();
+    var sql = "SELECT uuid FROM member";
+    connection.query(sql, function (err, result, fields) {
+        if (err) {
+            console.log('[SELECT ERROR] - ', err.message);
+            return;
+        }
+        for (var i = 0; i < result.length; i++) {
+            var uuid = result[i].uuid;
+            bot.push(uuid, msg);
+        }
+    });
+}
 
 //天氣
 function getWeather() {
