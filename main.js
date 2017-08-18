@@ -5,11 +5,13 @@
  */
 var mysql = require('mysql');
 var request = require("request");
-
+var cheerio = require("cheerio");
 var linebot = require('linebot');
 var express = require('express');
 var fs = require('fs');
-var timer, timer2;
+
+
+var timer, timer2, timer3; //各項時程發送
 var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
 var wallet = require('./wallet.js'); //錢包
 var member = require('./Member.js'); //會員
@@ -75,16 +77,19 @@ bot.on('message', function (event) {
                 //重新計算
                 wallet.reset(user_id, event);
             } else if (msg.indexOf("預報") !== -1) {
-                //預報天氣
-                timer2 = setInterval(getWeather(), 3600000);
-                sendMsg(event, '天氣預報-->啟動');
-            } else if (msg.indexOf("停止1") !== -1) {
-                //預報停止
+                //預報
+                var weather_sec = 3600 * 1000;
+                var news_sec = 7200 * 1000;
+                timer2 = setInterval(getWeather(), weather_sec);
+                timer3 = setInterval(getNew(), news_sec);
+                sendMsg(event, '預報-->啟動');
+            } else if (msg.indexOf("停止") !== -1) {
+                //預報
                 clearTimeout(timer2);
-                sendMsg(event, '天氣預報停止');
+                clearTimeout(timer3);
+                sendMsg(event, '預報停止');
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
-
                 fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
                     if (error) { //如果有錯誤就列印訊息並離開程式
                         console.log('檔案讀取錯誤。');
@@ -209,5 +214,58 @@ function getWeather() {
     };
 }
 
+//天氣
+function getNew() {
+    return function () {
+        var connection = mysql.createConnection({
+            host: host_ip,
+            user: 'root',
+            password: 'x22122327',
+            database: 'wallet'
+        });
+        connection.connect();
+        var sql = "SELECT uuid FROM member";
+        connection.query(sql, function (err, result, fields) {
+            if (err) {
+                console.log('[SELECT ERROR] - ', err.message);
+                return;
+            }
+            for (var i = 0; i < result.length; i++) {
+                var uuid = result[i].uuid;
+                var url = "http://www.chinatimes.com/hotnews/click";
+                request(url, function (error, response, body) {
+                    if (!error) {
+                        // 用 cheerio 解析 html 資料
+                        var $ = cheerio.load(body);
+                        // 篩選有興趣的資料
+                        var NowDate = new Date();
+                        var y = NowDate.getFullYear();
+                        var mm = NowDate.getMonth() + 1;
+                        var d = NowDate.getDate();
+                        var h = NowDate.getHours();
+                        var m = NowDate.getMinutes();
+                        var time = y + '年' + mm + '月' + d + '日 ' + h + ':' + m;
+                        var msg_result = time + '\n';
+                        var count = 0;
+                        $('.ga-list ul li h2').each(function (i, elem) {
+                            count++;
+                            msg_result += count + '. ' + String($(this).text()).trim() + '\n';
+                        });
+                        bot.push(uuid, msg_result);
+                        console.log('uuid:' + uuid);
+                    } else {
+                        console.log('news_error');
+                    }
+                });
+            }
+        });
+        console.log('news_check');
+    };
+}
 
+
+//氣象
 timer2 = setInterval(getWeather(), 3600000);
+
+//新聞
+timer3 = setInterval(getNew(), 7200000);
