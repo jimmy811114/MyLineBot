@@ -98,7 +98,7 @@ bot.on('message', function (event) {
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '1'});
             } else if (msg.indexOf("通知") !== -1) {
                 //通知
-                sendAll(msg, 4);
+                sendAll(msg, 2);
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
                 fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
@@ -157,9 +157,19 @@ function sendAll(msg, count) {
         }
         for (var i = 0; i < result.length; i++) {
             var uuid = result[i].uuid;
-            bot.push(uuid, {type: 'sticker', packageId: '1', stickerId: count});
-            bot.push(uuid, msg);
+            console.log('sending:' + uuid);
+            if (count !== 0) {
+                bot.push(uuid, {type: 'sticker', packageId: '1', stickerId: count});
+            }
         }
+        setTimeout(function () {
+            console.log('sending:text');
+            for (var i = 0; i < result.length; i++) {
+                var uuid = result[i].uuid;
+                console.log('sending:' + uuid);
+                bot.push(uuid, msg);
+            }
+        }, 1500);
     });
 }
 
@@ -447,11 +457,12 @@ console.log('Start: news');
 //-------------------------------------------排程
 //早安
 var rule = new schedule.RecurrenceRule();
-rule.hour = 9;
+rule.hour = 8;
 rule.minute = 0;
 rule.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
 var job = new schedule.scheduleJob(rule, function () {
     // do jobs here 
+    timer = setInterval(getBus(url_913, bus_stop_913), 30000);
     var msg = '早安喔~要準備上班了，加油!';
     sendAll(msg, 5);
 });
