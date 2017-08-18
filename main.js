@@ -78,8 +78,12 @@ bot.on('message', function (event) {
                 wallet.reset(user_id, event);
             } else if (msg.indexOf("預報") !== -1) {
                 //預報
+                clearTimeout(timer2);
+                clearTimeout(timer3);
                 var weather_sec = 3600 * 1000;
                 var news_sec = 7200 * 1000;
+                getWeather();
+                getNew();
                 timer2 = setInterval(getWeather(), weather_sec);
                 timer3 = setInterval(getNew(), news_sec);
                 sendMsg(event, '預報-->啟動');
@@ -293,9 +297,6 @@ timer2 = setInterval(getWeather(), 3600000);
 
 //新聞
 timer3 = setInterval(getNew(), 7200000);
-
-getWeather();
-getNew();
 
 console.log('Start: weather');
 console.log('Start: news');
