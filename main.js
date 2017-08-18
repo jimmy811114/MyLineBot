@@ -197,10 +197,8 @@ function getWeather() {
                     if (!error) {
                         var obj = JSON.parse(body);
                         var w_msg = obj.desc;
-//                        if (w_msg.indexOf("雨") !== -1) {
-                            bot.push(uuid, '公司那邊可能要下雨了喔!\n訊息:' + w_msg);
-                            console.log('uuid:' + uuid);
-//                        }
+                        bot.push(uuid, w_msg);
+                        console.log('uuid:' + uuid);
                     } else {
                         console.log('weather_error');
                     }
@@ -212,4 +210,4 @@ function getWeather() {
 }
 
 
-timer2 = setInterval(getWeather(), 1800000);
+timer2 = setInterval(getWeather(), 3600000);
