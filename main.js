@@ -95,6 +95,10 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("通知") !== -1) {
                 //通知
                 sendAll(msg, 2);
+            } else if (msg.indexOf("本週電影") !== -1) {
+                //本週新電影
+                sendMsg(event, '幫你查到本週的新電影喔~');
+                sendMovie(user_id);
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
                 fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
@@ -122,9 +126,9 @@ bot.on('message', function (event) {
         console.log(err);
     }
 });
-        const app = express();
-        const linebotParser = bot.parser();
-        app.post('/', linebotParser);
+const app = express();
+const linebotParser = bot.parser();
+app.post('/', linebotParser);
 //因為 express 預設走 port 3000，而 heroku 上預設卻不是，要透過下列程式轉換
 var server = app.listen(process.env.PORT || 3000, function () {
     var port = server.address().port;
@@ -409,6 +413,28 @@ function sendWeather() {
         }
     });
     console.log('weather_check');
+}
+
+//傳送電影資訊
+function sendMovie(uuid) {
+    var url = "https://tw.movies.yahoo.com/movie_thisweek.html";
+    request(url, function (error, response, body) {
+        if (!error) {
+            // 用 cheerio 解析 html 資料
+            var $ = cheerio.load(body);
+            // 篩選有興趣的資料
+            $('.release_list li .release_foto img').each(function (i, elem) {
+                var img = String($(this).attr('src')).trim();
+                bot.push(uuid, {
+                    type: 'image',
+                    originalContentUrl: img,
+                    previewImageUrl: img
+                });
+            });
+        } else {
+            console.log('movie_error');
+        }
+    });
 }
 
 //Youbike
