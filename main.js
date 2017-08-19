@@ -413,15 +413,14 @@ function sendWeather() {
 
 //Youbike
 function sendYouBike(uuid, m_la, m_lo) {
-    var url2 = "http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5";
+    var url2 = "http://data.ntpc.gov.tw/od/data/api/54DDDC93-589C-4858-9C95-18B2046CC1FC;jsessionid=D51FCCA45AEB241C6F902E6E9AB6B219?$format=json";
     request(url2, function (error, response, body) {
         if (!error) {
             var obj = JSON.parse(body);
-            var data = obj.result.results;
             var d_array = [];
-            for (var i = 0; i < data.length; i++) {
-                var d_lat = data[i].lat;
-                var d_lng = data[i].lng;
+            for (var i = 0; i < obj.length; i++) {
+                var d_lat = obj[i].lat;
+                var d_lng = obj[i].lng;
                 d_array.push(distance(m_la, m_lo, d_lat, d_lng));
             }
 
@@ -436,7 +435,7 @@ function sendYouBike(uuid, m_la, m_lo) {
             }
 
             //result
-            var result_bike = data[result_t];
+            var result_bike = obj[result_t];
             var sna_b = result_bike.sna;
             var ar_b = result_bike.ar;
             var lat_b = result_bike.lat;
@@ -445,7 +444,7 @@ function sendYouBike(uuid, m_la, m_lo) {
             var bemp = result_bike.bemp;
             bot.push(uuid,
                     '幫你查到YouBike資訊如下:\n地區'
-                    + sna_b + '\n位置:' + ar_b + '\n剩餘:' + sbi_b + '台\n剩餘空位:' + bemp + '\n距離:' + min.toFixed(2) + ' km');
+                    + sna_b + '\n位置:' + ar_b + '\n剩餘:' + sbi_b + ' 台\n剩餘空位:' + bemp + ' 格\n距離:' + min.toFixed(2) + ' km');
             bot.push(uuid, {type: 'location', title: sna_b, address: ar_b, latitude: lat_b, longitude: lng_b});
         } else {
             console.log('YouBike_error');
