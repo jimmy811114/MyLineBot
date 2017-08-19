@@ -455,6 +455,7 @@ function sendMovie_Rank(uuid) {
                 var movie = String($(this).text()).trim();
                 result += '第' + count + '名：' + movie + '\n';
                 if (count === 10) {
+                    result += 'https://tw.movies.yahoo.com/index.html';
                     bot.push(uuid, result);
                     return;
                 }
