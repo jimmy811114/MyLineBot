@@ -445,7 +445,7 @@ function sendYouBike(uuid, m_la, m_lo) {
             var bemp = result_bike.bemp;
             bot.push(uuid,
                     '幫你查到YouBike資訊如下:\n地區'
-                    + sna_b + '\n位置:' + ar_b + '\n剩餘:' + sbi_b + '台\n剩餘空位:' + bemp + '\n距離:' + min.toFixed(2) + 'm');
+                    + sna_b + '\n位置:' + ar_b + '\n剩餘:' + sbi_b + '台\n剩餘空位:' + bemp + '\n距離:' + min.toFixed(2) + ' lkm');
             bot.push(uuid, {type: 'location', title: sna_b, address: ar_b, latitude: lat_b, longitude: lng_b});
         } else {
             console.log('YouBike_error');
