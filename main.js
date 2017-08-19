@@ -95,11 +95,10 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("通知") !== -1) {
                 //通知
                 sendAll(msg, 2);
-            } else if (msg.indexOf("本週電影") !== -1) {
+            } else if (msg.indexOf("電影") !== -1) {
                 //本週新電影
                 sendMsg(event, '幫你查到本週的新電影喔~');
                 sendMovie(user_id);
-                sendMsg(event, '幫你查到本週排行喔~');
                 setTimeout(function () {
                     sendMovie_Rank(user_id);
                 }, 1500);
