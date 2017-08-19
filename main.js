@@ -99,6 +99,10 @@ bot.on('message', function (event) {
                 //本週新電影
                 sendMsg(event, '幫你查到本週的新電影喔~');
                 sendMovie(user_id);
+                sendMsg(event, '幫你查到本週排行喔~');
+                setTimeout(function () {
+                    sendMovie_Rank(user_id);
+                }, 1500);
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
                 fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
@@ -431,6 +435,28 @@ function sendMovie(uuid) {
                     previewImageUrl: img
                 });
             });
+        } else {
+            console.log('movie_error');
+        }
+    });
+}
+
+//傳送電影資訊(排行)
+function sendMovie_Rank(uuid) {
+    var url = "https://tw.movies.yahoo.com/chart.html";
+    request(url, function (error, response, body) {
+        if (!error) {
+            // 用 cheerio 解析 html 資料
+            var $ = cheerio.load(body);
+            // 篩選有興趣的資料
+            var result = '本週電影排行:\n';
+            var count = 1;
+            $('.ranking_list_r a span').each(function (i, elem) {
+                var movie = String($(this).text()).trim();
+                result += '第' + count + '名：' + movie + '\n';
+                count++;
+            });
+            bot.push(uuid, result);
         } else {
             console.log('movie_error');
         }
