@@ -171,6 +171,7 @@ function sendAll(msg, count) {
             }
         }, 1500);
     });
+    connection.end();
 }
 
 //-------------------------------------------顯示資料 
@@ -207,6 +208,7 @@ function getWeather() {
                         console.log('uuid:' + uuid);
                     }
                 });
+                connection.end();
             } else {
                 console.log('weather_error');
             }
@@ -257,6 +259,7 @@ function getNew() {
                         console.log('uuid:' + uuid);
                     }
                 });
+                connection.end();
             } else {
                 console.log('news_error');
             }
@@ -301,6 +304,7 @@ function getBus(bus_url, stop_uid) {
                             }
                         });
                         console.log('bus_check');
+                        connection.end();
                     }
                 }
             } else {
@@ -358,6 +362,7 @@ function sendNews() {
                     console.log('uuid:' + uuid);
                 }
             });
+            connection.end();
         } else {
             console.log('news_error');
         }
@@ -396,6 +401,7 @@ function sendWeather() {
                     console.log('uuid:' + uuid);
                 }
             });
+            connection.end();
         } else {
             console.log('weather_error');
         }
@@ -437,6 +443,7 @@ function sendBus(bus_url, stop_uid) {
                             console.log('uuid:' + uuid);
                         }
                     });
+                    connection.end();
                     console.log('bus_check');
                 }
             }
