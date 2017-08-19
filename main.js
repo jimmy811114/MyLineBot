@@ -129,9 +129,9 @@ bot.on('message', function (event) {
         console.log(err);
     }
 });
-const app = express();
-const linebotParser = bot.parser();
-app.post('/', linebotParser);
+        const app = express();
+        const linebotParser = bot.parser();
+        app.post('/', linebotParser);
 //因為 express 預設走 port 3000，而 heroku 上預設卻不是，要透過下列程式轉換
 var server = app.listen(process.env.PORT || 3000, function () {
     var port = server.address().port;
@@ -449,13 +449,17 @@ function sendMovie_Rank(uuid) {
             var $ = cheerio.load(body);
             // 篩選有興趣的資料
             var result = '本週電影排行:\n';
-            var count = 1;
+            var count = 0;
             $('.ranking_list_r a span').each(function (i, elem) {
+                count++;
                 var movie = String($(this).text()).trim();
                 result += '第' + count + '名：' + movie + '\n';
-                count++;
+                if (count === 10) {
+                    bot.push(uuid, result);
+                    return;
+                }
             });
-            bot.push(uuid, result);
+
         } else {
             console.log('movie_error');
         }
@@ -619,12 +623,6 @@ var job6 = new schedule.scheduleJob(rule6, function () {
     sendAll(msg, 2);
 });
 console.log('Start: schedule');
-
-
-
-
-
-
 //-------------------------------function
 function distance(lat1, lon1, lat2, lon2) {
     var R = 6371; // km (change this constant to get miles)
