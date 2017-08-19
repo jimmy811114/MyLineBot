@@ -10,8 +10,6 @@ var linebot = require('linebot');
 var express = require('express');
 var fs = require('fs');
 var schedule = require('node-schedule');
-
-
 var timer, timer2, timer3; //各項時程發送
 var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
 var wallet = require('./wallet.js'); //錢包
@@ -23,19 +21,17 @@ var bus_stop_254 = "TPE17606";
 var url_254 = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Taipei/254?$top=100&$format=JSON";
 var bus_stop_913 = "NWT19549";
 var url_913 = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/NewTaipei/913?$top=100&$format=JSON";
-
 var bot = linebot({
     channelId: '1530553288',
     channelSecret: 'e3706264cb1f29efc1139468825b3482',
     channelAccessToken: 'b3opydEiDWolKryUMs7STk0rsSKkb+23DtyoRI058FuPyhXXRzTzStDFJZOqlF7ut1wv5V7Zb9UDGAJZuQb8nq2Ng2P/xXwSyJiXMZ4RzAkO9z1uF9EVaOtByhFGpeoMZnUeVSdKM5DAxzclGzlOZwdB04t89/1O/w1cDnyilFU='
 });
-
 bot.on('message', function (event) {
     console.log(event); //把收到訊息的 event 印出來看看
     try {
+        var user_id = event.source.userId;
         if (event.message.type === 'text') {
             var msg = event.message.text;
-            var user_id = event.source.userId;
             if (msg.indexOf("天氣") !== -1) {
                 //傳送天氣資訊
                 my_robot.send_weather(event);
@@ -111,10 +107,16 @@ bot.on('message', function (event) {
                         //把這Buffer物件的內容變成一個字串，以作輸出。
                         //下回教學會解釋Buffer物件是用來幹什麼的                   
                         sendMsg(event, robot_msg + content.toString());
-                        bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '9'});//9
+                        bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '9'}); //9
                     }
                 });
             }
+        } else if (event.message.type === 'location') {
+            sendMsg(event, '幫你查詢附近的YouBike~:D');
+            var la = event.message.latitude;
+            var lo = event.message.longitude;
+            sendYouBike(user_id, la, lo);
+            //sendMsg(event, la + ',' + lo);
         }
     } catch (err) {
         console.log(err);
@@ -409,6 +411,50 @@ function sendWeather() {
     console.log('weather_check');
 }
 
+//Youbike
+function sendYouBike(uuid, m_la, m_lo) {
+    var url2 = "http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5";
+    request(url2, function (error, response, body) {
+        if (!error) {
+            var obj = JSON.parse(body);
+            var data = obj.result.results;
+            var d_array = [];
+            for (var i = 0; i < data.length; i++) {
+                var d_lat = data[i].lat;
+                var d_lng = data[i].lng;
+                d_array.push(distance(m_la, m_lo, d_lat, d_lng));
+            }
+
+            //比大小
+            var result_t = 0;
+            var min = 100000;
+            for (var i = 0; i < d_array.length; i++) {
+                if (d_array[i] < min) {
+                    min = d_array[i];
+                    result_t = i;
+                }
+            }
+
+            //result
+            var result_bike = data[result_t];
+            var sna_b = result_bike.sna;
+            var ar_b = result_bike.ar;
+            var lat_b = result_bike.lat;
+            var lng_b = result_bike.lng;
+            var sbi_b = result_bike.sbi;
+            var bemp = result_bike.bemp;
+            bot.push(uuid,
+                    '幫你查到YouBike資訊如下:\n地區'
+                    + sna_b + '\n位置:' + ar_b + '\n剩餘:' + sbi_b + '台\n剩餘空位:' + bemp);
+            bot.push(uuid, {type: 'location', title: sna_b, address: ar_b, latitude: lat_b, longitude: lng_b});
+        } else {
+            console.log('YouBike_error');
+        }
+    }
+    );
+    console.log('YouBike_check');
+}
+
 //公車
 function sendBus(bus_url, stop_uid) {
     request(bus_url, function (error, response, body) {
@@ -460,7 +506,6 @@ timer2 = setInterval(getWeather(), 3600000);
 timer3 = setInterval(getNew(), 7200000);
 console.log('Start: weather');
 console.log('Start: news');
-
 //-------------------------------------------排程
 //早安
 var rule = new schedule.RecurrenceRule();
@@ -524,3 +569,21 @@ var job6 = new schedule.scheduleJob(rule6, function () {
     sendAll(msg, 2);
 });
 console.log('Start: schedule');
+
+
+
+
+
+
+//-------------------------------function
+function distance(lat1, lon1, lat2, lon2) {
+    var R = 6371; // km (change this constant to get miles)
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+    return d;
+}
