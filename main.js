@@ -19,6 +19,10 @@ var host_ip = "127.0.0.1"; //資料庫IP
 var admin_msg = '這是老大專用功能喔!';
 var admin_user = '';
 
+//電腦狀態
+var os = require('os');
+var os_u = require('os-utils');
+
 //-----------------------------------------
 var bus_status = false;
 var report_status = true;
@@ -142,6 +146,14 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("狀態") !== -1) {
                 //系統狀態
                 sendStatus(user_id);
+            } else if (msg.indexOf("jimmy") !== -1) {
+                //系統狀態
+                os_u.cpuUsage(function (v) {
+                    var total_mem = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
+                    var free_mem = (os.freemem() / 1024 / 1024 / 1024).toFixed(2);
+                    var sys_msg = '【電腦系統狀態】\nCPU Usage : ' + v.toFixed(2) + '%\nTotal memory : ' + total_mem + 'GB\nFress memory : ' + free_mem + 'GB';
+                    bot.push(user_id, sys_msg);
+                });
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
                 fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
@@ -565,14 +577,23 @@ function sendRestaurant(uuid, m_la, m_lo) {
             }
 
             //比大小
-            var result_t = 0;
-            var min = 100000;
+            var min = 10;
+            var rest_array = [];
             for (var i = 0; i < d_array.length; i++) {
                 if (d_array[i] < min) {
-                    min = d_array[i];
-                    result_t = i;
+                    rest_array.push(i);
                 }
             }
+
+            if (rest_array.length === 0) {
+                bot.push(uuid, '抱歉找不到餐廳喔...');
+                return;
+            }
+
+            //抽一個
+            var maxNum = rest_array.length - 1;
+            var minNum = 0;
+            var result_t = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
 
 
             //result
