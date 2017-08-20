@@ -16,6 +16,8 @@ var wallet = require('./wallet.js'); //錢包
 var member = require('./Member.js'); //會員
 
 var host_ip = "127.0.0.1"; //資料庫IP
+var admin_msg = '這是老大專用功能喔!';
+var admin_user = '';
 
 var bus_stop_254 = "TPE17606";
 var url_254 = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Taipei/254?$top=100&$format=JSON";
@@ -60,16 +62,28 @@ bot.on('message', function (event) {
                 member.saveMember(user_id, event);
             } else if (msg.indexOf("913") !== -1) {
                 //913
+                if (!isAdmin(user_id)) {
+                    bot.push(user_id, admin_msg);
+                    return;
+                }
                 timer = setInterval(getBus(url_913, bus_stop_913), 30000);
                 sendMsg(event, '913-->啟動');
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '12'});
             } else if (msg.indexOf("254") !== -1) {
                 //254
+                if (!isAdmin(user_id)) {
+                    bot.push(user_id, admin_msg);
+                    return;
+                }
                 timer = setInterval(getBus(url_254, bus_stop_254), 30000);
                 sendMsg(event, '254-->啟動');
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '12'});
             } else if (msg.indexOf("公車停") !== -1) {
                 //stop
+                if (!isAdmin(user_id)) {
+                    bot.push(user_id, admin_msg);
+                    return;
+                }
                 clearTimeout(timer);
                 sendMsg(event, '公車-->停止');
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '1'});
@@ -78,6 +92,10 @@ bot.on('message', function (event) {
                 wallet.reset(user_id, event);
             } else if (msg.indexOf("預報") !== -1) {
                 //預報
+                if (!isAdmin(user_id)) {
+                    bot.push(user_id, admin_msg);
+                    return;
+                }
                 clearTimeout(timer2);
                 clearTimeout(timer3);
                 var weather_sec = 3600 * 1000;
@@ -88,12 +106,20 @@ bot.on('message', function (event) {
                 sendMsg(event, '預報-->啟動');
             } else if (msg.indexOf("停止") !== -1) {
                 //預報
+                if (!isAdmin(user_id)) {
+                    bot.push(user_id, admin_msg);
+                    return;
+                }
                 clearTimeout(timer2);
                 clearTimeout(timer3);
                 sendMsg(event, '預報停止');
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '1'});
             } else if (msg.indexOf("通知") !== -1) {
                 //通知
+                if (!isAdmin(user_id)) {
+                    bot.push(user_id, admin_msg);
+                    return;
+                }
                 sendAll(msg, 2);
             } else if (msg.indexOf("電影") !== -1) {
                 //本週新電影
@@ -555,12 +581,14 @@ function sendBus(bus_url, stop_uid) {
 }
 //------------------------------------------送出訊息
 
+setAdmin();
 //氣象
 timer2 = setInterval(getWeather(), 3600000);
 //新聞
 timer3 = setInterval(getNew(), 7200000);
 console.log('Start: weather');
 console.log('Start: news');
+console.log('Set Admin');
 //-------------------------------------------排程
 //早安
 var rule = new schedule.RecurrenceRule();
@@ -635,4 +663,34 @@ function distance(lat1, lon1, lat2, lon2) {
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c;
     return d;
+}
+
+//判斷是否是Admin
+function isAdmin(account) {
+    var isV = false;
+    if (account === admin_user) {
+        isV = true;
+    }
+    return isV;
+}
+
+//取得Admin
+function setAdmin() {
+    var connection = mysql.createConnection({
+        host: host_ip,
+        user: 'root',
+        password: 'x22122327',
+        database: 'wallet'
+    });
+    connection.connect();
+    var sql = "SELECT uuid FROM member where admin=1";
+    connection.query(sql, function (err, result, fields) {
+        if (err) {
+            console.log('[SELECT ERROR] - ', err.message);
+        }
+        for (var i = 0; i < result.length; i++) {
+            var uuid = result[i].uuid;
+            admin_user = uuid;
+        }
+    });
 }
