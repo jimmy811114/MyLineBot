@@ -740,7 +740,7 @@ var job3 = new schedule.scheduleJob(rule3, function () {
 var rule4 = new schedule.RecurrenceRule();
 rule4.hour = 23;
 rule4.minute = 0;
-rule4.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
+rule4.dayOfWeek = [new schedule.Range(1, 6)]; // 每星期日.四~六的下午5點0分
 var job4 = new schedule.scheduleJob(rule4, function () {
     // do jobs here 
     clearTimeout(timer2);
