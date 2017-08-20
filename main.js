@@ -712,6 +712,7 @@ rule.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5�
 var job = new schedule.scheduleJob(rule, function () {
     // do jobs here 
     report_status = true;
+    bus_status = true;
     var weather_sec = 3600 * 1000;
     var news_sec = 7200 * 1000;
     clearTimeout(timer);
