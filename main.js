@@ -74,7 +74,7 @@ bot.on('message', function (event) {
                 //扣錢
                 var money = msg.substring(1);
                 wallet.set_Money(user_id, money, 0, event);
-            } else if (msg.indexOf("錢") !== -1) {
+            } else if (msg.indexOf("錢") !== -1 || msg.indexOf("多少") !== -1) {
                 //顯示錢
                 wallet.show_Money(user_id, event);
             } else if (msg.indexOf("儲存") !== -1) {
