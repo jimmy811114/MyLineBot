@@ -156,7 +156,7 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("狀態") !== -1) {
                 //系統狀態
                 sendStatus(user_id);
-            } else if (msg.indexOf("jimmy") !== -1) {
+            } else if (msg.indexOf("jimmy") !== -1 || msg.indexOf("Jimmy") !== -1) {
                 //系統狀態
                 os_u.cpuUsage(function (v) {
                     var total_mem = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
