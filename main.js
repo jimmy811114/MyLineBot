@@ -491,6 +491,9 @@ function sendWeather() {
                 for (var i = 0; i < result.length; i++) {
                     var uuid = result[i].uuid;
                     bot.push(uuid, w_msg);
+                    if (desc.indexOf("雨") !== -1) {
+                        bot.push(uuid, '有可能會下雨喔\n~記得帶雨傘!');
+                    }
                     console.log('uuid:' + uuid);
                 }
             });
