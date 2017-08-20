@@ -179,6 +179,23 @@ bot.on('message', function (event) {
                         bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '2'});
                     }
                 });
+            } else {
+                if (group_id === undefined) {
+                    var robot_msg = 'Hi~我是咪咪你可以問我：\n';
+                    fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
+                        if (error) { //如果有錯誤就列印訊息並離開程式
+                            console.log('檔案讀取錯誤。');
+                        } else {
+                            //把檔案的內容輸出
+                            //注意content變數的類型不是一個字串（String）
+                            //而是一個Buffer物件，所以要用 Buffer.toString() 方法來
+                            //把這Buffer物件的內容變成一個字串，以作輸出。
+                            //下回教學會解釋Buffer物件是用來幹什麼的                   
+                            sendMsg(event, robot_msg + content.toString());
+                            bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '2'});
+                        }
+                    });
+                }
             }
         } else if (event.message.type === 'location') {
             var la = event.message.latitude;
