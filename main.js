@@ -10,12 +10,16 @@ var linebot = require('linebot');
 var express = require('express');
 var fs = require('fs');
 var schedule = require('node-schedule');
+var mkdirp = require('mkdirp');
+
+
 var timer, timer2, timer3; //各項時程發送
 var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
 var wallet = require('./wallet.js'); //錢包
 var member = require('./Member.js'); //會員
 
 var host_ip = "127.0.0.1"; //資料庫IP
+var my_url = 'https://6bdff784.ngrok.io';
 var admin_msg = '這是老大專用功能喔!';
 var admin_user = '';
 
@@ -47,6 +51,7 @@ bot.on('message', function (event) {
             if (msg.indexOf("天氣") !== -1) {
                 //傳送天氣資訊
                 my_robot.send_weather(event);
+                downloadPic(user_id);
             } else if (msg.indexOf("ETH") !== -1 || msg.indexOf("以太") !== -1) {
                 //傳送以太幣資訊
                 my_robot.send_ETH(event);
@@ -185,6 +190,7 @@ bot.on('message', function (event) {
         const linebotParser = bot.parser();
         app.post('/', linebotParser);
 //因為 express 預設走 port 3000，而 heroku 上預設卻不是，要透過下列程式轉換
+app.use(express.static(__dirname + '/public'));
 var server = app.listen(process.env.PORT || 3000, function () {
     var port = server.address().port;
     console.log("App now running on port", port);
@@ -798,4 +804,52 @@ function sendStatus(userID) {
         }
     });
     connection.end();
+}
+
+//下載衛星雲圖
+function downloadPic(uuid) {
+    //目标网址
+    var url = 'http://tropic.ssec.wisc.edu/real-time/imagemain.php?&basin=westpac&prod=irbbm&sat=gms';
+    var web = 'http://tropic.ssec.wisc.edu/real-time/';
+
+//本地存储目录
+    var dir = './images';
+
+//创建目录
+    mkdirp(dir, function (err) {
+        if (err) {
+            console.log(err);
+        }
+    });
+
+//发送请求
+    request(url, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            var $ = cheerio.load(body);
+            var count = 0;
+            $('img').each(function () {
+                count++;
+                var src = $(this).attr('src');
+                console.log('loading...:' + web + src);
+                download(web + src, dir, count + '.jpg');
+                console.log('complete');
+            });
+            setTimeout(function () {
+                console.log('sending:Weather_Pic');
+                var img = my_url + '/images/1.jpg';
+                bot.push(uuid, {
+                    type: 'image',
+                    originalContentUrl: img,
+                    previewImageUrl: img
+                });
+            }, 1000);
+        }
+    });
+
+//下载方法
+    var download = function (url, dir, filename) {
+        request.head(url, function (err, res, body) {
+            request(url).pipe(fs.createWriteStream(dir + "/" + filename));
+        });
+    };
 }
