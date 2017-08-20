@@ -151,7 +151,7 @@ bot.on('message', function (event) {
                 os_u.cpuUsage(function (v) {
                     var total_mem = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
                     var free_mem = (os.freemem() / 1024 / 1024 / 1024).toFixed(2);
-                    var sys_msg = '【電腦系統狀態】\nCPU Usage : ' + v.toFixed(2) + '%\nTotal memory : ' + total_mem + 'GB\nFress memory : ' + free_mem + 'GB';
+                    var sys_msg = '【電腦系統狀態】\nCPU Usage : ' + v.toFixed(2) + '%\nTotal memory : ' + total_mem + 'GB\nFree memory : ' + free_mem + 'GB';
                     bot.push(user_id, sys_msg);
                 });
             } else {
