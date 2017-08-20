@@ -813,13 +813,14 @@ function sendStatus(userID) {
 
 //下載衛星雲圖
 function downloadPic(uuid) {
+
     //目标网址
     var url = 'http://tropic.ssec.wisc.edu/real-time/imagemain.php?&basin=westpac&prod=irbbm&sat=gms';
     var web = 'http://tropic.ssec.wisc.edu/real-time/';
 
 //本地存储目录
-    var dir = './images';
-
+    var dir = './public/images';
+    fs.unlinkSync(dir + '/1.jpg');
 //创建目录
     mkdirp(dir, function (err) {
         if (err) {
