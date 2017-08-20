@@ -145,10 +145,10 @@ bot.on('message', function (event) {
                 });
             }
         } else if (event.message.type === 'location') {
-            sendMsg(event, '幫你查詢附近的YouBike~:D');
             var la = event.message.latitude;
             var lo = event.message.longitude;
             sendYouBike(user_id, la, lo);
+            sendRestaurant(user_id, la, lo);
             //sendMsg(event, la + ',' + lo);
         }
     } catch (err) {
@@ -524,10 +524,54 @@ function sendYouBike(uuid, m_la, m_lo) {
             var lng_b = result_bike.lng;
             var sbi_b = result_bike.sbi;
             var bemp = result_bike.bemp;
-            bot.push(uuid,
-                    '幫你查到YouBike資訊如下:\n地區'
-                    + sna_b + '\n位置:' + ar_b + '\n剩餘:' + sbi_b + ' 台\n剩餘空位:' + bemp + ' 格\n距離:' + min.toFixed(2) + ' km');
-            bot.push(uuid, {type: 'location', title: sna_b, address: ar_b, latitude: lat_b, longitude: lng_b});
+            var msg = '幫你查到YouBike資訊如下:\n地區'
+                    + sna_b + '\n位置:' + ar_b + '\n剩餘:' + sbi_b + ' 台\n剩餘空位:' + bemp + ' 格\n距離:' + min.toFixed(2) + ' km';
+            bot.push(uuid, {type: 'location', title: '【YouBike資訊】\n' + msg, address: ar_b, latitude: lat_b, longitude: lng_b});
+        } else {
+            console.log('YouBike_error');
+        }
+    }
+    );
+    console.log('YouBike_check');
+}
+
+//美食
+function sendRestaurant(uuid, m_la, m_lo) {
+    var url2 = "http://gis.taiwan.net.tw/XMLReleaseALL_public/restaurant_C_f.json";
+    request(url2, function (error, response, body) {
+        if (!error) {
+            var body_data = String(body).trim();
+            var obj = JSON.parse(body_data);
+            var d_array = [];
+            var data_array = obj.Infos.Info;
+            for (var i = 0; i < data_array.length; i++) {
+                var d_lat = data_array[i].Py;
+                var d_lng = data_array[i].Px;
+                d_array.push(distance(m_la, m_lo, d_lat, d_lng));
+            }
+
+            //比大小
+            var result_t = 0;
+            var min = 100000;
+            for (var i = 0; i < d_array.length; i++) {
+                if (d_array[i] < min) {
+                    min = d_array[i];
+                    result_t = i;
+                }
+            }
+
+
+            //result
+            var restaurant = data_array[result_t];
+            var Name = restaurant.Name;
+            var Description = restaurant.Description;
+            var Add = restaurant.Add;
+            var lat_b = restaurant.Py;
+            var lng_b = restaurant.Px;
+            var web = restaurant.Website;
+            var msg = '找到的餐廳資訊如下:\n名稱:' + Name + '\n簡介:' + Description + '\n' + web;
+            bot.push(uuid, msg);
+            bot.push(uuid, {type: 'location', title: Name + '地址:', address: Add, latitude: lat_b, longitude: lng_b});
         } else {
             console.log('YouBike_error');
         }
