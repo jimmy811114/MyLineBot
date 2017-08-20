@@ -704,6 +704,7 @@ rule.minute = 0;
 rule.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
 var job = new schedule.scheduleJob(rule, function () {
     // do jobs here 
+    report_status = true;
     var weather_sec = 3600 * 1000;
     var news_sec = 7200 * 1000;
     clearTimeout(timer);
@@ -745,6 +746,7 @@ var job4 = new schedule.scheduleJob(rule4, function () {
     // do jobs here 
     clearTimeout(timer2);
     clearTimeout(timer3);
+    report_status = false;
     var msg = '準備睡覺囉~晚安';
     sendAll(msg, 1);
 });
@@ -757,6 +759,7 @@ var job5 = new schedule.scheduleJob(rule5, function () {
     // do jobs here 
     clearTimeout(timer2);
     clearTimeout(timer3);
+    report_status = false;
     var msg = '明天要上班了~收心睡覺吧~';
     sendAll(msg, 2);
 });
@@ -774,6 +777,7 @@ var job6 = new schedule.scheduleJob(rule6, function () {
     clearTimeout(timer3);
     timer2 = setInterval(getWeather(), weather_sec);
     timer3 = setInterval(getNew(), news_sec);
+    report_status = true;
     sendAll(msg, 2);
 });
 console.log('Start: schedule');
