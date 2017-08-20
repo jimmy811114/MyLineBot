@@ -19,6 +19,12 @@ var host_ip = "127.0.0.1"; //資料庫IP
 var admin_msg = '這是老大專用功能喔!';
 var admin_user = '';
 
+//-----------------------------------------
+var bus_status = false;
+var report_status = true;
+//-----------------------------------------
+
+
 var bus_stop_254 = "TPE17606";
 var url_254 = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Taipei/254?$top=100&$format=JSON";
 var bus_stop_913 = "NWT19549";
@@ -66,6 +72,7 @@ bot.on('message', function (event) {
                     bot.push(user_id, admin_msg);
                     return;
                 }
+                bus_status = true;
                 timer = setInterval(getBus(url_913, bus_stop_913), 30000);
                 sendMsg(event, '913-->啟動');
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '12'});
@@ -75,6 +82,7 @@ bot.on('message', function (event) {
                     bot.push(user_id, admin_msg);
                     return;
                 }
+                bus_status = true;
                 timer = setInterval(getBus(url_254, bus_stop_254), 30000);
                 sendMsg(event, '254-->啟動');
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '12'});
@@ -84,6 +92,7 @@ bot.on('message', function (event) {
                     bot.push(user_id, admin_msg);
                     return;
                 }
+                bus_status = false;
                 clearTimeout(timer);
                 sendMsg(event, '公車-->停止');
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '1'});
@@ -96,6 +105,7 @@ bot.on('message', function (event) {
                     bot.push(user_id, admin_msg);
                     return;
                 }
+                report_status = true;
                 clearTimeout(timer2);
                 clearTimeout(timer3);
                 var weather_sec = 3600 * 1000;
@@ -110,6 +120,7 @@ bot.on('message', function (event) {
                     bot.push(user_id, admin_msg);
                     return;
                 }
+                report_status = false;
                 clearTimeout(timer2);
                 clearTimeout(timer3);
                 sendMsg(event, '預報停止');
@@ -128,6 +139,9 @@ bot.on('message', function (event) {
                 setTimeout(function () {
                     sendMovie_Rank(user_id);
                 }, 1500);
+            } else if (msg.indexOf("狀態") !== -1) {
+                //系統狀態
+                sendStatus(user_id);
             } else {
                 var robot_msg = '抱歉，我聽不懂你說什麼：\n';
                 fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
@@ -737,4 +751,30 @@ function setAdmin() {
             admin_user = uuid;
         }
     });
+}
+
+//傳給狀態
+function sendStatus(userID) {
+    var connection = mysql.createConnection({
+        host: host_ip,
+        user: 'root',
+        password: 'x22122327',
+        database: 'wallet'
+    });
+    connection.connect();
+    var sql = "SELECT count(*) as total FROM member";
+    connection.query(sql, function (err, result, fields) {
+        if (err) {
+            console.log('[SELECT ERROR] - ', err.message);
+            return;
+        }
+        if (result.length > 0) {
+            var total = result[0].total; //人數
+            var msg = '【狀態】\n會員人數:' + total + '\n公車播報:' + bus_status + '\n預報播報:' + report_status;
+            bot.push(userID, msg);
+        } else {
+            bot.push(userID, '目前沒有資料');
+        }
+    });
+    connection.end();
 }
