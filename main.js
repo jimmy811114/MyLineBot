@@ -46,6 +46,11 @@ bot.on('message', function (event) {
     console.log(event); //把收到訊息的 event 印出來看看
     try {
         var user_id = event.source.userId;
+        var group_id = event.source.groupId;
+        if (group_id !== undefined) {
+            user_id = group_id;
+        }
+        console.log('group_id:' + group_id);
         if (event.message.type === 'text') {
             var msg = event.message.text;
             if (msg.indexOf("天氣") !== -1) {
@@ -159,8 +164,8 @@ bot.on('message', function (event) {
                     var sys_msg = '【電腦系統狀態】\nCPU Usage : ' + v.toFixed(2) + '%\nTotal memory : ' + total_mem + 'GB\nFree memory : ' + free_mem + 'GB';
                     bot.push(user_id, sys_msg);
                 });
-            } else {
-                var robot_msg = '抱歉，我聽不懂你說什麼：\n';
+            } else if (msg.indexOf("說明") !== -1 || msg.indexOf("咪咪") !== -1) {
+                var robot_msg = 'Hi~我是咪咪你可以問我：\n';
                 fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
                     if (error) { //如果有錯誤就列印訊息並離開程式
                         console.log('檔案讀取錯誤。');
@@ -171,7 +176,7 @@ bot.on('message', function (event) {
                         //把這Buffer物件的內容變成一個字串，以作輸出。
                         //下回教學會解釋Buffer物件是用來幹什麼的                   
                         sendMsg(event, robot_msg + content.toString());
-                        bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '9'}); //9
+                        bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '2'});
                     }
                 });
             }
