@@ -569,15 +569,15 @@ function sendRestaurant(uuid, m_la, m_lo) {
             var lat_b = restaurant.Py;
             var lng_b = restaurant.Px;
             var web = restaurant.Website;
-            var msg = '找到的餐廳資訊如下:\n名稱:' + Name + '\n簡介:' + Description + '\n' + web;
+            var msg = '找到的餐廳資訊如下:\n名稱:' + Name + '\n簡介:' + Description + '\n距離:' + min.toFixed(2) + ' km\n' + web;
             bot.push(uuid, msg);
             bot.push(uuid, {type: 'location', title: Name + '地址:', address: Add, latitude: lat_b, longitude: lng_b});
         } else {
-            console.log('YouBike_error');
+            console.log('Restaurant_error');
         }
     }
     );
-    console.log('YouBike_check');
+    console.log('Restaurant_check');
 }
 
 //公車
