@@ -278,6 +278,7 @@ function getWeather() {
                 var rainfall = obj.rainfall;
                 var sunset = obj.sunset;
                 var w_msg = desc + '\n溫度:' + temperature + '\n體感:' + felt_air_temp + '\n降雨機率:' + rainfall + '\n日落時間:' + sunset;
+
                 var connection = mysql.createConnection({
                     host: host_ip,
                     user: 'root',
@@ -294,6 +295,9 @@ function getWeather() {
                     for (var i = 0; i < result.length; i++) {
                         var uuid = result[i].uuid;
                         bot.push(uuid, w_msg);
+                        if (desc.indexOf("雨") !== -1) {
+                            bot.push(uuid, '有可能會下雨喔\n~記得帶雨傘!');
+                        }
                         console.log('uuid:' + uuid);
                     }
                 });
