@@ -705,8 +705,13 @@ rule.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5�
 var job = new schedule.scheduleJob(rule, function () {
     // do jobs here 
     timer = setInterval(getBus(url_913, bus_stop_913), 30000);
+    var weather_sec = 3600 * 1000;
+    var news_sec = 7200 * 1000;
+    timer2 = setInterval(getWeather(), weather_sec);
+    timer3 = setInterval(getNew(), news_sec);
     var msg = '早安喔~要準備上班了，加油!';
     sendAll(msg, 5);
+    showURL_DATA();
 });
 //午安
 var rule2 = new schedule.RecurrenceRule();
@@ -735,6 +740,8 @@ rule4.minute = 0;
 rule4.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
 var job4 = new schedule.scheduleJob(rule4, function () {
     // do jobs here 
+    clearTimeout(timer2);
+    clearTimeout(timer3);
     var msg = '準備睡覺囉~晚安';
     sendAll(msg, 1);
 });
