@@ -11,8 +11,6 @@ var express = require('express');
 var fs = require('fs');
 var schedule = require('node-schedule');
 var mkdirp = require('mkdirp');
-
-
 var timer, timer2, timer3; //各項時程發送
 var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
 var wallet = require('./wallet.js'); //錢包
@@ -22,11 +20,9 @@ var host_ip = "127.0.0.1"; //資料庫IP
 var my_url = 'https://6bdff784.ngrok.io';
 var admin_msg = '這是老大專用功能喔!';
 var admin_user = '';
-
 //電腦狀態
 var os = require('os');
 var os_u = require('os-utils');
-
 //-----------------------------------------
 var bus_status = false;
 var report_status = true;
@@ -156,6 +152,31 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("狀態") !== -1) {
                 //系統狀態
                 sendStatus(user_id);
+            } else if (msg.indexOf("紫外") !== -1) {
+                //系統狀態
+                var uv_msg = {
+                    type: 'template',
+                    altText: 'this is a buttons template',
+                    template: {
+                        type: 'buttons',
+                        title: 'Menu',
+                        text: 'Please select',
+                        actions: [{
+                                type: 'postback',
+                                label: 'Buy',
+                                data: 'action=buy&itemid=123'
+                            }, {
+                                type: 'postback',
+                                label: 'Add to cart',
+                                data: 'action=add&itemid=123'
+                            }, {
+                                type: 'uri',
+                                label: 'View detail',
+                                uri: 'http://example.com/page/123'
+                            }]
+                    }
+                };
+                bot.push(user_id, uv_msg);
             } else if (msg.indexOf("jimmy") !== -1 || msg.indexOf("Jimmy") !== -1) {
                 //系統狀態
                 os_u.cpuUsage(function (v) {
@@ -278,7 +299,6 @@ function getWeather() {
                 var rainfall = obj.rainfall;
                 var sunset = obj.sunset;
                 var w_msg = desc + '\n溫度:' + temperature + '\n體感:' + felt_air_temp + '\n降雨機率:' + rainfall + '\n日落時間:' + sunset;
-
                 var connection = mysql.createConnection({
                     host: host_ip,
                     user: 'root',
@@ -409,7 +429,6 @@ function getBus(bus_url, stop_uid) {
             console.log(err);
         }
     };
-
 }
 
 //顯示預報資料
@@ -552,7 +571,6 @@ function sendMovie_Rank(uuid) {
                     return;
                 }
             });
-
         } else {
             console.log('movie_error');
         }
@@ -634,8 +652,6 @@ function sendRestaurant(uuid, m_la, m_lo) {
             var maxNum = rest_array.length - 1;
             var minNum = 0;
             var result_t = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
-
-
             //result
             var restaurant = data_array[result_t];
             var Name = restaurant.Name;
@@ -866,10 +882,9 @@ function sendStatus(userID) {
 //下載衛星雲圖
 function downloadPic(uuid) {
 
-    //目标网址
+//目标网址
     var url = 'http://tropic.ssec.wisc.edu/real-time/imagemain.php?&basin=westpac&prod=irbbm&sat=gms';
     var web = 'http://tropic.ssec.wisc.edu/real-time/';
-
 //本地存储目录
     var dir = './public/images';
     fs.unlinkSync(dir + '/1.jpg');
@@ -879,7 +894,6 @@ function downloadPic(uuid) {
             console.log(err);
         }
     });
-
 //发送请求
     request(url, function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -903,7 +917,6 @@ function downloadPic(uuid) {
             }, 1000);
         }
     });
-
 //下载方法
     var download = function (url, dir, filename) {
         request.head(url, function (err, res, body) {
