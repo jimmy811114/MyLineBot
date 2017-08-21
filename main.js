@@ -939,7 +939,7 @@ function getUV(userID, u_msg) {
     request(url2, function (error, response, body) {
         try {
             if (!error) {
-                var msg = my_m;
+                var msg = String(my_m);
                 var body_data = String(body).trim();
                 var obj = JSON.parse(body_data);
                 var result_t = -1;
