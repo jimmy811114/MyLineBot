@@ -208,9 +208,9 @@ bot.on('message', function (event) {
         console.log(err);
     }
 });
-        const app = express();
-        const linebotParser = bot.parser();
-        app.post('/', linebotParser);
+const app = express();
+const linebotParser = bot.parser();
+app.post('/', linebotParser);
 //因為 express 預設走 port 3000，而 heroku 上預設卻不是，要透過下列程式轉換
 app.use(express.static(__dirname + '/public'));
 var server = app.listen(process.env.PORT || 3000, function () {
@@ -364,47 +364,52 @@ function getNew() {
 //公車
 function getBus(bus_url, stop_uid) {
     return function () {
-        request(bus_url, function (error, response, body) {
-            if (!error) {
-                var obj = JSON.parse(body);
-                for (var i = 0; i < obj.length; i++) {
-                    var obj_s = obj[i];
-                    if (obj_s.StopUID === stop_uid) {
-                        var stop = obj_s.StopName;
-                        var time = obj_s.EstimateTime;
-                        var min = parseInt(time / 60);
-                        var sec = time % 60;
-                        var result = min + '分' + sec + '秒';
-                        var stop_name = stop.Zh_tw;
-                        var msg = result + '將到站\n' + stop_name;
-                        var connection = mysql.createConnection({
-                            host: host_ip,
-                            user: 'root',
-                            password: 'x22122327',
-                            database: 'wallet'
-                        });
-                        connection.connect();
-                        var sql = "SELECT uuid FROM member where bus = 1";
-                        connection.query(sql, function (err, result, fields) {
-                            if (err) {
-                                console.log('[SELECT ERROR] - ', err.message);
-                                return;
-                            }
-                            for (var i = 0; i < result.length; i++) {
-                                var uuid = result[i].uuid;
-                                bot.push(uuid, msg);
-                                console.log('uuid:' + uuid);
-                            }
-                        });
-                        console.log('bus_check');
-                        connection.end();
+        try {
+            request(bus_url, function (error, response, body) {
+                if (!error) {
+                    var obj = JSON.parse(body);
+                    for (var i = 0; i < obj.length; i++) {
+                        var obj_s = obj[i];
+                        if (obj_s.StopUID === stop_uid) {
+                            var stop = obj_s.StopName;
+                            var time = obj_s.EstimateTime;
+                            var min = parseInt(time / 60);
+                            var sec = time % 60;
+                            var result = min + '分' + sec + '秒';
+                            var stop_name = stop.Zh_tw;
+                            var msg = result + '將到站\n' + stop_name;
+                            var connection = mysql.createConnection({
+                                host: host_ip,
+                                user: 'root',
+                                password: 'x22122327',
+                                database: 'wallet'
+                            });
+                            connection.connect();
+                            var sql = "SELECT uuid FROM member where bus = 1";
+                            connection.query(sql, function (err, result, fields) {
+                                if (err) {
+                                    console.log('[SELECT ERROR] - ', err.message);
+                                    return;
+                                }
+                                for (var i = 0; i < result.length; i++) {
+                                    var uuid = result[i].uuid;
+                                    bot.push(uuid, msg);
+                                    console.log('uuid:' + uuid);
+                                }
+                            });
+                            console.log('bus_check');
+                            connection.end();
+                        }
                     }
+                } else {
+                    console.log('bus_error');
                 }
-            } else {
-                console.log('bus_error');
-            }
-        });
+            });
+        } catch (err) {
+            console.log(err);
+        }
     };
+
 }
 
 //顯示預報資料
