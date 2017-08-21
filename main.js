@@ -165,6 +165,9 @@ bot.on('message', function (event) {
                 //系統狀態
                 sendMsg(event, '幫你查詢紫外線資訊~\n等我一下喔...');
                 getUV(user_id, msg);
+            } else if (msg.indexOf("笑話") !== -1) {
+                //傳送笑話
+                getJoke(user_id);
             } else if (msg.indexOf("jimmy") !== -1 || msg.indexOf("Jimmy") !== -1) {
                 //系統狀態
                 os_u.cpuUsage(function (v) {
@@ -1000,4 +1003,58 @@ function getUV(userID, u_msg) {
     });
     console.log('UV_check');
 }
+
+
+//笑話
+function getJoke(uuid) {
+    //抽一個
+    var result_t = Math.floor(Math.random() * (48 - 0 + 1)) + 0;
+    var result_tl = Math.floor(Math.random() * (12 - 0 + 1)) + 0;
+    var url = "http://joke.876.tw/show/list_" + parseInt(result_tl) + "_" + result_t + ".shtml";
+    var page = "http://joke.876.tw/show/";
+    request(url, function (error, response, body) {
+        try {
+            if (!error) {
+                // 用 cheerio 解析 html 資料
+                var url_data = [];
+                var talks = [];
+                var $ = cheerio.load(body);
+                // 篩選有興趣的資料
+                $('.jright .jlist dd a').each(function (i, elem) {
+                    var talk = String($(this).text()).trim();
+                    var href = String($(this).attr('href')).trim();
+                    //console.log(url + href);
+                    url_data.push(page + href);
+                    talks.push(talk);
+                });
+
+                //抽一個
+                var maxNum = url_data.length;
+                var minNum = 0;
+                var result_t = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+                request(url_data[result_t], function (error, response, body) {
+                    if (!error) {
+                        var msg = talks[result_t] + '\n';
+                        var $ = cheerio.load(body);
+                        // 篩選有興趣的資料
+                        $('.arts_c').each(function (i, elem) {
+                            var talk = String($(this).text()).trim();
+                            msg += talk + '\n';
+                        });
+                        var result = msg.substring(0, msg.indexOf("本笑話集刊登時間"));
+                        //console.log(msg.indexOf("本笑話集刊登時間"));
+                        //console.log(result);
+                        bot.push(uuid, result);
+                        console.log('joke_send');
+                    }
+                });
+            } else {
+                console.log('joke_error');
+            }
+        } catch (err) {
+            getJoke(uuid);
+        }
+    });
+}
+
 
