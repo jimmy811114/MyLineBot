@@ -611,6 +611,7 @@ function sendYouBike(uuid, m_la, m_lo) {
                 console.log('YouBike_error');
             }
         } catch (err) {
+            bot.push(uuid, 'oh no 發生問題！\n' + err);
             console.log(err);
         }
     });
@@ -666,6 +667,7 @@ function sendRestaurant(uuid, m_la, m_lo) {
                 console.log('Restaurant_error');
             }
         } catch (err) {
+            bot.push(uuid, 'oh no 發生問題！\n' + err);
             console.log(err);
         }
     });
@@ -978,6 +980,7 @@ function getUV(userID, u_msg) {
                 console.log('Restaurant_error');
             }
         } catch (err) {
+            bot.push(userID, 'oh no 發生問題！\n' + err);
             console.log(err);
         }
     });
