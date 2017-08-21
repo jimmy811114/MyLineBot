@@ -154,28 +154,7 @@ bot.on('message', function (event) {
                 sendStatus(user_id);
             } else if (msg.indexOf("紫外") !== -1) {
                 //系統狀態
-                var uv_msg = {
-                    type: 'template',
-                    altText: 'this is a buttons template',
-                    template: {
-                        type: 'buttons',
-                        title: 'Menu',
-                        text: 'Please select',
-                        actions: [{
-                                type: 'postback',
-                                label: 'Buy',
-                                data: 'action=buy&itemid=123'
-                            }, {
-                                type: 'postback',
-                                label: 'Add to cart',
-                                data: 'action=add&itemid=123'
-                            }, {
-                                type: 'uri',
-                                label: 'View detail',
-                                uri: 'http://example.com/page/123'
-                            }]
-                    }
-                };
+                var uv_msg = '製作中...';
                 bot.push(user_id, uv_msg);
             } else if (msg.indexOf("jimmy") !== -1 || msg.indexOf("Jimmy") !== -1) {
                 //系統狀態
