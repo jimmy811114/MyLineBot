@@ -1034,7 +1034,7 @@ function getJoke(uuid) {
                 var result_t = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
                 request(url_data[result_t], function (error, response, body) {
                     if (!error) {
-                        var msg = talks[result_t] + '\n';
+                        var msg = '來個笑話吧~\n[' + talks[result_t] + ']\n';
                         var $ = cheerio.load(body);
                         // 篩選有興趣的資料
                         $('.arts_c').each(function (i, elem) {
