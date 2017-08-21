@@ -82,6 +82,10 @@ bot.on('message', function (event) {
                     bot.push(user_id, admin_msg);
                     return;
                 }
+                if (bus_status) {
+                    bot.push(user_id, '公車已經啟動囉！');
+                    return;
+                }
                 bus_status = true;
                 timer = setInterval(getBus(url_913, bus_stop_913), 30000);
                 sendMsg(event, '913-->啟動');
@@ -90,6 +94,10 @@ bot.on('message', function (event) {
                 //254
                 if (!isAdmin(user_id)) {
                     bot.push(user_id, admin_msg);
+                    return;
+                }
+                if (bus_status) {
+                    bot.push(user_id, '公車已經啟動囉！');
                     return;
                 }
                 bus_status = true;
@@ -104,6 +112,7 @@ bot.on('message', function (event) {
                 }
                 bus_status = false;
                 clearTimeout(timer);
+                timer = undefined;
                 sendMsg(event, '公車-->停止');
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '1'});
             } else if (msg.indexOf("清除") !== -1) {
@@ -742,6 +751,9 @@ var job = new schedule.scheduleJob(rule, function () {
     clearTimeout(timer);
     clearTimeout(timer2);
     clearTimeout(timer3);
+    timer = undefined;
+    timer2 = undefined;
+    timer3 = undefined;
     timer = setInterval(getBus(url_913, bus_stop_913), 30000);
     timer2 = setInterval(getWeather(), weather_sec);
     timer3 = setInterval(getNew(), news_sec);
