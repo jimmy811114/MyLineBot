@@ -9,6 +9,7 @@ var cheerio = require("cheerio");
 var linebot = require('linebot');
 var express = require('express');
 var fs = require('fs');
+var path = require("path");
 var schedule = require('node-schedule');
 var mkdirp = require('mkdirp');
 var timer, timer2, timer3; //各項時程發送
@@ -161,6 +162,9 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("狀態") !== -1) {
                 //系統狀態
                 sendStatus(user_id);
+            } else if (msg.indexOf("搞笑") !== -1) {
+                //搞笑
+                sendJOKE_PIC(user_id);
             } else if (msg.indexOf("紫外") !== -1) {
                 //系統狀態
                 sendMsg(event, '幫你查詢紫外線資訊~\n等我一下喔...');
@@ -1053,6 +1057,30 @@ function getJoke(uuid) {
             }
         } catch (err) {
             getJoke(uuid);
+        }
+    });
+}
+
+//傳送好笑圖片
+function sendJOKE_PIC(uuid) {
+    var dir = './joke';
+// Print folder name
+    fs.readdir(dir, function (err, files) {
+        if (!err)
+        {
+            var data = [];
+            files.forEach(function (file) {
+                file_full_path = path.join(dir, file);
+                data.push(file_full_path);
+            });
+            var result_t = Math.floor(Math.random() * ((data.length - 1) - 0 + 1)) + 0;
+            var img = my_url + '/' + data[result_t];
+            bot.push(uuid, {
+                type: 'image',
+                originalContentUrl: img,
+                previewImageUrl: img
+            });
+            console.log('send_jokePic');
         }
     });
 }
