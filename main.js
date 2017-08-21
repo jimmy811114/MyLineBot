@@ -17,9 +17,14 @@ var my_robot = require('./MyRobot.js'); //爬蟲智慧庫
 var wallet = require('./wallet.js'); //錢包
 var member = require('./Member.js'); //會員
 
+//--------------------------set
 var host_ip = "127.0.0.1"; //資料庫IP
 var my_url = 'https://6bdff784.ngrok.io';
 var admin_msg = '這是老大專用功能喔!';
+var weather_sec = 7200 * 1000;
+var news_sec = 7200 * 1000;
+//--------------------------set
+
 var admin_user = '';
 //電腦狀態
 var os = require('os');
@@ -128,8 +133,6 @@ bot.on('message', function (event) {
                 report_status = true;
                 clearTimeout(timer2);
                 clearTimeout(timer3);
-                var weather_sec = 3600 * 1000;
-                var news_sec = 7200 * 1000;
                 showURL_DATA();
                 timer2 = setInterval(getWeather(), weather_sec);
                 timer3 = setInterval(getNew(), news_sec);
@@ -224,9 +227,9 @@ bot.on('message', function (event) {
         console.log(err);
     }
 });
-const app = express();
-const linebotParser = bot.parser();
-app.post('/', linebotParser);
+        const app = express();
+        const linebotParser = bot.parser();
+        app.post('/', linebotParser);
 //因為 express 預設走 port 3000，而 heroku 上預設卻不是，要透過下列程式轉換
 app.use(express.static(__dirname + '/public'));
 var server = app.listen(process.env.PORT || 3000, function () {
@@ -753,8 +756,6 @@ var job = new schedule.scheduleJob(rule, function () {
     // do jobs here 
     report_status = true;
     bus_status = true;
-    var weather_sec = 3600 * 1000;
-    var news_sec = 7200 * 1000;
     clearTimeout(timer);
     clearTimeout(timer2);
     clearTimeout(timer3);
@@ -821,8 +822,6 @@ rule6.minute = 0;
 rule6.dayOfWeek = [0, 6]; // 每星期日.四~六的下午5點0分
 var job6 = new schedule.scheduleJob(rule6, function () {
     // do jobs here 
-    var weather_sec = 3600 * 1000;
-    var news_sec = 7200 * 1000;
     var msg = '早安!美好的假日~起床啦!';
     clearTimeout(timer2);
     clearTimeout(timer3);
@@ -984,7 +983,7 @@ function getUV(userID, u_msg) {
                     return;
                 }
 
-                //result
+//result
                 var res = obj[result_t];
                 var UVI = res.UVI;
                 var coun = res.County;
@@ -1011,7 +1010,7 @@ function getUV(userID, u_msg) {
 
 //笑話
 function getJoke(uuid) {
-    //抽一個
+//抽一個
     var result_t = Math.floor(Math.random() * (48 - 0 + 1)) + 0;
     var result_tl = Math.floor(Math.random() * (12 - 0 + 1)) + 0;
     var url = "http://joke.876.tw/show/list_" + parseInt(result_tl) + "_" + result_t + ".shtml";
@@ -1031,7 +1030,6 @@ function getJoke(uuid) {
                     url_data.push(page + href);
                     talks.push(talk);
                 });
-
                 //抽一個
                 var maxNum = url_data.length;
                 var minNum = 0;
