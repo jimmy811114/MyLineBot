@@ -960,3 +960,10 @@ function getUV(userID, u_msg) {
         console.log(err);
     }
 }
+
+request.on('error', function(err) {
+    // Handle error
+    console.log('error_request');
+});
+
+request.end();
