@@ -154,8 +154,7 @@ bot.on('message', function (event) {
                 sendStatus(user_id);
             } else if (msg.indexOf("紫外") !== -1) {
                 //系統狀態
-                var uv_msg = '製作中...';
-                bot.push(user_id, uv_msg);
+                getUV(user_id, msg);
             } else if (msg.indexOf("jimmy") !== -1 || msg.indexOf("Jimmy") !== -1) {
                 //系統狀態
                 os_u.cpuUsage(function (v) {
@@ -902,4 +901,53 @@ function downloadPic(uuid) {
             request(url).pipe(fs.createWriteStream(dir + "/" + filename));
         });
     };
+}
+
+//UV
+function getUV(userID, u_msg) {
+    var url2 = "http://opendata.epa.gov.tw/ws/Data/UV/?$format=json";
+    var my_m;
+    if (u_msg.indexOf("台") !== -1) {
+        my_m = u_msg.replace(/台/, "臺");
+    }
+    try {
+        request(url2, function (error, response, body) {
+            if (!error) {
+                var msg = my_m;
+                var body_data = String(body).trim();
+                var obj = JSON.parse(body_data);
+                var result_t = -1;
+                for (var i = 0; i < obj.length; i++) {
+                    var County = String(obj[i].County).substring(0, 2);
+                    if (County.indexOf(msg) !== -1) {
+                        result_t = i;
+                    }
+                }
+
+                if (result_t === -1) {
+                    console.log('not found');
+                    bot.push(userID, '找不到該地區的紫外線耶...');
+                    return;
+                }
+
+                //result
+                var res = obj[result_t];
+                var UVI = res.UVI;
+                var coun = res.County;
+                var msg = '查到以下紫外線資訊\n' + coun + '的紫外線:' + UVI;
+                bot.push(userID, msg);
+                var img = my_url + '/images/uv.jpg';
+                bot.push(userID, {
+                    type: 'image',
+                    originalContentUrl: img,
+                    previewImageUrl: img
+                });
+            } else {
+                console.log('Restaurant_error');
+            }
+        });
+        console.log('UV_check');
+    } catch (err) {
+        console.log(err);
+    }
 }
