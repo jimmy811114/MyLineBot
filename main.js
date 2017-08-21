@@ -49,8 +49,11 @@ bot.on('message', function (event) {
     try {
         var user_id = event.source.userId;
         var group_id = event.source.groupId;
+        var room_id = event.source.roomId;
         if (group_id !== undefined) {
             user_id = group_id;
+        } else if (room_id !== undefined) {
+            user_id = room_id;
         }
         console.log('group_id:' + group_id);
         if (event.message.type === 'text') {
@@ -199,7 +202,7 @@ bot.on('message', function (event) {
                     }
                 });
             } else {
-                if (group_id === undefined) {
+                if (group_id === undefined && room_id === undefined) {
                     var robot_msg = 'Hi~我是咪咪你可以問我：\n';
                     fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
                         if (error) { //如果有錯誤就列印訊息並離開程式
