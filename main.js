@@ -946,6 +946,8 @@ function getUV(userID, u_msg) {
     var my_m;
     if (u_msg.indexOf("台") !== -1) {
         my_m = u_msg.replace(/台/, "臺");
+    } else {
+        my_m = u_msg;
     }
 
     request(url2, function (error, response, body) {
