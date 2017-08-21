@@ -154,6 +154,7 @@ bot.on('message', function (event) {
                 sendStatus(user_id);
             } else if (msg.indexOf("紫外") !== -1) {
                 //系統狀態
+                sendMsg(event, '幫你查詢紫外線資訊~\n等我一下喔...');
                 getUV(user_id, msg);
             } else if (msg.indexOf("jimmy") !== -1 || msg.indexOf("Jimmy") !== -1) {
                 //系統狀態
@@ -919,7 +920,7 @@ function getUV(userID, u_msg) {
                 var result_t = -1;
                 for (var i = 0; i < obj.length; i++) {
                     var County = String(obj[i].County).substring(0, 2);
-                    if (County.indexOf(msg) !== -1) {
+                    if (msg.indexOf(County) !== -1) {
                         result_t = i;
                     }
                 }
