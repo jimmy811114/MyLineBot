@@ -924,6 +924,13 @@ function getUV(userID, u_msg) {
                         result_t = i;
                     }
                 }
+                
+                for (var i = 0; i < obj.length; i++) {
+                    var SiteName = obj[i].SiteName;
+                    if (msg.indexOf(SiteName) !== -1) {
+                        result_t = i;
+                    }
+                }
 
                 if (result_t === -1) {
                     console.log('not found');
