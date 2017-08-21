@@ -363,8 +363,8 @@ function getNew() {
 //公車
 function getBus(bus_url, stop_uid) {
     return function () {
-        try {
-            request(bus_url, function (error, response, body) {
+        request(bus_url, function (error, response, body) {
+            try {
                 if (!error) {
                     var obj = JSON.parse(body);
                     for (var i = 0; i < obj.length; i++) {
@@ -403,10 +403,10 @@ function getBus(bus_url, stop_uid) {
                 } else {
                     console.log('bus_error');
                 }
-            });
-        } catch (err) {
-            console.log(err);
-        }
+            } catch (err) {
+                console.log(err);
+            }
+        });
     };
 }
 
@@ -911,8 +911,9 @@ function getUV(userID, u_msg) {
     if (u_msg.indexOf("台") !== -1) {
         my_m = u_msg.replace(/台/, "臺");
     }
-    try {
-        request(url2, function (error, response, body) {
+
+    request(url2, function (error, response, body) {
+        try {
             if (!error) {
                 var msg = my_m;
                 var body_data = String(body).trim();
@@ -954,16 +955,10 @@ function getUV(userID, u_msg) {
             } else {
                 console.log('Restaurant_error');
             }
-        });
-        console.log('UV_check');
-    } catch (err) {
-        console.log(err);
-    }
+        } catch (err) {
+            console.log(err);
+        }
+    });
+    console.log('UV_check');
 }
 
-request.on('error', function(err) {
-    // Handle error
-    console.log('error_request');
-});
-
-request.end();
