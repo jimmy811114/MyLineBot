@@ -269,40 +269,44 @@ function getWeather() {
     return function () {
         var url2 = "https://works.ioa.tw/weather/api/weathers/4.json";
         request(url2, function (error, response, body) {
-            if (!error) {
-                var obj = JSON.parse(body);
-                var obj = JSON.parse(body);
-                var desc = obj.desc;
-                var temperature = obj.temperature;
-                var felt_air_temp = obj.felt_air_temp;
-                var rainfall = obj.rainfall;
-                var sunset = obj.sunset;
-                var w_msg = desc + '\n溫度:' + temperature + '\n體感:' + felt_air_temp + '\n降雨機率:' + rainfall + '\n日落時間:' + sunset;
-                var connection = mysql.createConnection({
-                    host: host_ip,
-                    user: 'root',
-                    password: 'x22122327',
-                    database: 'wallet'
-                });
-                connection.connect();
-                var sql = "SELECT uuid FROM member";
-                connection.query(sql, function (err, result, fields) {
-                    if (err) {
-                        console.log('[SELECT ERROR] - ', err.message);
-                        return;
-                    }
-                    for (var i = 0; i < result.length; i++) {
-                        var uuid = result[i].uuid;
-                        bot.push(uuid, w_msg);
-                        if (desc.indexOf("雨") !== -1) {
-                            bot.push(uuid, '有可能會下雨喔\n~記得帶雨傘!');
+            try {
+                if (!error) {
+                    var obj = JSON.parse(body);
+                    var obj = JSON.parse(body);
+                    var desc = obj.desc;
+                    var temperature = obj.temperature;
+                    var felt_air_temp = obj.felt_air_temp;
+                    var rainfall = obj.rainfall;
+                    var sunset = obj.sunset;
+                    var w_msg = desc + '\n溫度:' + temperature + '\n體感:' + felt_air_temp + '\n降雨機率:' + rainfall + '\n日落時間:' + sunset;
+                    var connection = mysql.createConnection({
+                        host: host_ip,
+                        user: 'root',
+                        password: 'x22122327',
+                        database: 'wallet'
+                    });
+                    connection.connect();
+                    var sql = "SELECT uuid FROM member";
+                    connection.query(sql, function (err, result, fields) {
+                        if (err) {
+                            console.log('[SELECT ERROR] - ', err.message);
+                            return;
                         }
-                        console.log('uuid:' + uuid);
-                    }
-                });
-                connection.end();
-            } else {
-                console.log('weather_error');
+                        for (var i = 0; i < result.length; i++) {
+                            var uuid = result[i].uuid;
+                            bot.push(uuid, w_msg);
+                            if (desc.indexOf("雨") !== -1) {
+                                bot.push(uuid, '有可能會下雨喔\n~記得帶雨傘!');
+                            }
+                            console.log('uuid:' + uuid);
+                        }
+                    });
+                    connection.end();
+                } else {
+                    console.log('weather_error');
+                }
+            } catch (err) {
+                console.log(err);
             }
         });
         console.log('weather_check');
@@ -314,46 +318,50 @@ function getNew() {
     return function () {
         var url = "http://www.chinatimes.com/hotnews/click";
         request(url, function (error, response, body) {
-            if (!error) {
-                // 用 cheerio 解析 html 資料
-                var $ = cheerio.load(body);
-                // 篩選有興趣的資料
-                var NowDate = new Date();
-                var y = NowDate.getFullYear();
-                var mm = NowDate.getMonth() + 1;
-                var d = NowDate.getDate();
-                var h = NowDate.getHours();
-                var m = NowDate.getMinutes();
-                var time = y + '年' + mm + '月' + d + '日 ' + h + ':' + m;
-                var msg_result = time + '\n';
-                var count = 0;
-                $('.ga-list ul li h2').each(function (i, elem) {
-                    count++;
-                    msg_result += count + '. ' + String($(this).text()).trim() + '\n';
-                });
-                msg_result += url;
-                var connection = mysql.createConnection({
-                    host: host_ip,
-                    user: 'root',
-                    password: 'x22122327',
-                    database: 'wallet'
-                });
-                connection.connect();
-                var sql = "SELECT uuid FROM member";
-                connection.query(sql, function (err, result, fields) {
-                    if (err) {
-                        console.log('[SELECT ERROR] - ', err.message);
-                        return;
-                    }
-                    for (var i = 0; i < result.length; i++) {
-                        var uuid = result[i].uuid;
-                        bot.push(uuid, msg_result);
-                        console.log('uuid:' + uuid);
-                    }
-                });
-                connection.end();
-            } else {
-                console.log('news_error');
+            try {
+                if (!error) {
+                    // 用 cheerio 解析 html 資料
+                    var $ = cheerio.load(body);
+                    // 篩選有興趣的資料
+                    var NowDate = new Date();
+                    var y = NowDate.getFullYear();
+                    var mm = NowDate.getMonth() + 1;
+                    var d = NowDate.getDate();
+                    var h = NowDate.getHours();
+                    var m = NowDate.getMinutes();
+                    var time = y + '年' + mm + '月' + d + '日 ' + h + ':' + m;
+                    var msg_result = time + '\n';
+                    var count = 0;
+                    $('.ga-list ul li h2').each(function (i, elem) {
+                        count++;
+                        msg_result += count + '. ' + String($(this).text()).trim() + '\n';
+                    });
+                    msg_result += url;
+                    var connection = mysql.createConnection({
+                        host: host_ip,
+                        user: 'root',
+                        password: 'x22122327',
+                        database: 'wallet'
+                    });
+                    connection.connect();
+                    var sql = "SELECT uuid FROM member";
+                    connection.query(sql, function (err, result, fields) {
+                        if (err) {
+                            console.log('[SELECT ERROR] - ', err.message);
+                            return;
+                        }
+                        for (var i = 0; i < result.length; i++) {
+                            var uuid = result[i].uuid;
+                            bot.push(uuid, msg_result);
+                            console.log('uuid:' + uuid);
+                        }
+                    });
+                    connection.end();
+                } else {
+                    console.log('news_error');
+                }
+            } catch (err) {
+                console.log(err);
             }
         });
         console.log('news_check');
@@ -421,46 +429,50 @@ function showURL_DATA() {
 function sendNews() {
     var url = "http://www.chinatimes.com/hotnews/click";
     request(url, function (error, response, body) {
-        if (!error) {
-            // 用 cheerio 解析 html 資料
-            var $ = cheerio.load(body);
-            // 篩選有興趣的資料
-            var NowDate = new Date();
-            var y = NowDate.getFullYear();
-            var mm = NowDate.getMonth() + 1;
-            var d = NowDate.getDate();
-            var h = NowDate.getHours();
-            var m = NowDate.getMinutes();
-            var time = y + '年' + mm + '月' + d + '日 ' + h + ':' + m;
-            var msg_result = time + '\n';
-            var count = 0;
-            $('.ga-list ul li h2').each(function (i, elem) {
-                count++;
-                msg_result += count + '. ' + String($(this).text()).trim() + '\n';
-            });
-            msg_result += url;
-            var connection = mysql.createConnection({
-                host: host_ip,
-                user: 'root',
-                password: 'x22122327',
-                database: 'wallet'
-            });
-            connection.connect();
-            var sql = "SELECT uuid FROM member";
-            connection.query(sql, function (err, result, fields) {
-                if (err) {
-                    console.log('[SELECT ERROR] - ', err.message);
-                    return;
-                }
-                for (var i = 0; i < result.length; i++) {
-                    var uuid = result[i].uuid;
-                    bot.push(uuid, msg_result);
-                    console.log('uuid:' + uuid);
-                }
-            });
-            connection.end();
-        } else {
-            console.log('news_error');
+        try {
+            if (!error) {
+                // 用 cheerio 解析 html 資料
+                var $ = cheerio.load(body);
+                // 篩選有興趣的資料
+                var NowDate = new Date();
+                var y = NowDate.getFullYear();
+                var mm = NowDate.getMonth() + 1;
+                var d = NowDate.getDate();
+                var h = NowDate.getHours();
+                var m = NowDate.getMinutes();
+                var time = y + '年' + mm + '月' + d + '日 ' + h + ':' + m;
+                var msg_result = time + '\n';
+                var count = 0;
+                $('.ga-list ul li h2').each(function (i, elem) {
+                    count++;
+                    msg_result += count + '. ' + String($(this).text()).trim() + '\n';
+                });
+                msg_result += url;
+                var connection = mysql.createConnection({
+                    host: host_ip,
+                    user: 'root',
+                    password: 'x22122327',
+                    database: 'wallet'
+                });
+                connection.connect();
+                var sql = "SELECT uuid FROM member";
+                connection.query(sql, function (err, result, fields) {
+                    if (err) {
+                        console.log('[SELECT ERROR] - ', err.message);
+                        return;
+                    }
+                    for (var i = 0; i < result.length; i++) {
+                        var uuid = result[i].uuid;
+                        bot.push(uuid, msg_result);
+                        console.log('uuid:' + uuid);
+                    }
+                });
+                connection.end();
+            } else {
+                console.log('news_error');
+            }
+        } catch (err) {
+            console.log(err);
         }
     });
     console.log('news_check');
@@ -470,39 +482,43 @@ function sendNews() {
 function sendWeather() {
     var url2 = "https://works.ioa.tw/weather/api/weathers/4.json";
     request(url2, function (error, response, body) {
-        if (!error) {
-            var obj = JSON.parse(body);
-            var desc = obj.desc;
-            var temperature = obj.temperature;
-            var felt_air_temp = obj.felt_air_temp;
-            var rainfall = obj.rainfall;
-            var sunset = obj.sunset;
-            var w_msg = desc + '\n溫度:' + temperature + '\n體感:' + felt_air_temp + '\n降雨機率:' + rainfall + '\n日落時間:' + sunset;
-            var connection = mysql.createConnection({
-                host: host_ip,
-                user: 'root',
-                password: 'x22122327',
-                database: 'wallet'
-            });
-            connection.connect();
-            var sql = "SELECT uuid FROM member";
-            connection.query(sql, function (err, result, fields) {
-                if (err) {
-                    console.log('[SELECT ERROR] - ', err.message);
-                    return;
-                }
-                for (var i = 0; i < result.length; i++) {
-                    var uuid = result[i].uuid;
-                    bot.push(uuid, w_msg);
-                    if (desc.indexOf("雨") !== -1) {
-                        bot.push(uuid, '有可能會下雨喔\n~記得帶雨傘!');
+        try {
+            if (!error) {
+                var obj = JSON.parse(body);
+                var desc = obj.desc;
+                var temperature = obj.temperature;
+                var felt_air_temp = obj.felt_air_temp;
+                var rainfall = obj.rainfall;
+                var sunset = obj.sunset;
+                var w_msg = desc + '\n溫度:' + temperature + '\n體感:' + felt_air_temp + '\n降雨機率:' + rainfall + '\n日落時間:' + sunset;
+                var connection = mysql.createConnection({
+                    host: host_ip,
+                    user: 'root',
+                    password: 'x22122327',
+                    database: 'wallet'
+                });
+                connection.connect();
+                var sql = "SELECT uuid FROM member";
+                connection.query(sql, function (err, result, fields) {
+                    if (err) {
+                        console.log('[SELECT ERROR] - ', err.message);
+                        return;
                     }
-                    console.log('uuid:' + uuid);
-                }
-            });
-            connection.end();
-        } else {
-            console.log('weather_error');
+                    for (var i = 0; i < result.length; i++) {
+                        var uuid = result[i].uuid;
+                        bot.push(uuid, w_msg);
+                        if (desc.indexOf("雨") !== -1) {
+                            bot.push(uuid, '有可能會下雨喔\n~記得帶雨傘!');
+                        }
+                        console.log('uuid:' + uuid);
+                    }
+                });
+                connection.end();
+            } else {
+                console.log('weather_error');
+            }
+        } catch (err) {
+            console.log(err);
         }
     });
     console.log('weather_check');
@@ -560,41 +576,44 @@ function sendMovie_Rank(uuid) {
 function sendYouBike(uuid, m_la, m_lo) {
     var url2 = "http://data.ntpc.gov.tw/od/data/api/54DDDC93-589C-4858-9C95-18B2046CC1FC;jsessionid=D51FCCA45AEB241C6F902E6E9AB6B219?$format=json";
     request(url2, function (error, response, body) {
-        if (!error) {
-            var obj = JSON.parse(body);
-            var d_array = [];
-            for (var i = 0; i < obj.length; i++) {
-                var d_lat = obj[i].lat;
-                var d_lng = obj[i].lng;
-                d_array.push(distance(m_la, m_lo, d_lat, d_lng));
-            }
-
-            //比大小
-            var result_t = 0;
-            var min = 100000;
-            for (var i = 0; i < d_array.length; i++) {
-                if (d_array[i] < min) {
-                    min = d_array[i];
-                    result_t = i;
+        try {
+            if (!error) {
+                var obj = JSON.parse(body);
+                var d_array = [];
+                for (var i = 0; i < obj.length; i++) {
+                    var d_lat = obj[i].lat;
+                    var d_lng = obj[i].lng;
+                    d_array.push(distance(m_la, m_lo, d_lat, d_lng));
                 }
-            }
 
-            //result
-            var result_bike = obj[result_t];
-            var sna_b = result_bike.sna;
-            var ar_b = result_bike.ar;
-            var lat_b = result_bike.lat;
-            var lng_b = result_bike.lng;
-            var sbi_b = result_bike.sbi;
-            var bemp = result_bike.bemp;
-            var msg = '幫你查到YouBike資訊如下:\n地區'
-                    + sna_b + '\n位置:' + ar_b + '\n剩餘:' + sbi_b + ' 台\n剩餘空位:' + bemp + ' 格\n距離:' + min.toFixed(2) + ' km';
-            bot.push(uuid, {type: 'location', title: '【YouBike資訊】\n' + msg, address: ar_b, latitude: lat_b, longitude: lng_b});
-        } else {
-            console.log('YouBike_error');
+                //比大小
+                var result_t = 0;
+                var min = 100000;
+                for (var i = 0; i < d_array.length; i++) {
+                    if (d_array[i] < min) {
+                        min = d_array[i];
+                        result_t = i;
+                    }
+                }
+
+                //result
+                var result_bike = obj[result_t];
+                var sna_b = result_bike.sna;
+                var ar_b = result_bike.ar;
+                var lat_b = result_bike.lat;
+                var lng_b = result_bike.lng;
+                var sbi_b = result_bike.sbi;
+                var bemp = result_bike.bemp;
+                var msg = '幫你查到YouBike資訊如下:\n地區'
+                        + sna_b + '\n位置:' + ar_b + '\n剩餘:' + sbi_b + ' 台\n剩餘空位:' + bemp + ' 格\n距離:' + min.toFixed(2) + ' km';
+                bot.push(uuid, {type: 'location', title: '【YouBike資訊】\n' + msg, address: ar_b, latitude: lat_b, longitude: lng_b});
+            } else {
+                console.log('YouBike_error');
+            }
+        } catch (err) {
+            console.log(err);
         }
-    }
-    );
+    });
     console.log('YouBike_check');
 }
 
@@ -602,51 +621,54 @@ function sendYouBike(uuid, m_la, m_lo) {
 function sendRestaurant(uuid, m_la, m_lo) {
     var url2 = "http://gis.taiwan.net.tw/XMLReleaseALL_public/restaurant_C_f.json";
     request(url2, function (error, response, body) {
-        if (!error) {
-            var body_data = String(body).trim();
-            var obj = JSON.parse(body_data);
-            var d_array = [];
-            var data_array = obj.Infos.Info;
-            for (var i = 0; i < data_array.length; i++) {
-                var d_lat = data_array[i].Py;
-                var d_lng = data_array[i].Px;
-                d_array.push(distance(m_la, m_lo, d_lat, d_lng));
-            }
-
-            //比大小
-            var min = 10;
-            var rest_array = [];
-            for (var i = 0; i < d_array.length; i++) {
-                if (d_array[i] < min) {
-                    rest_array.push(i);
+        try {
+            if (!error) {
+                var body_data = String(body).trim();
+                var obj = JSON.parse(body_data);
+                var d_array = [];
+                var data_array = obj.Infos.Info;
+                for (var i = 0; i < data_array.length; i++) {
+                    var d_lat = data_array[i].Py;
+                    var d_lng = data_array[i].Px;
+                    d_array.push(distance(m_la, m_lo, d_lat, d_lng));
                 }
-            }
 
-            if (rest_array.length === 0) {
-                bot.push(uuid, '抱歉找不到餐廳喔...');
-                return;
-            }
+                //比大小
+                var min = 10;
+                var rest_array = [];
+                for (var i = 0; i < d_array.length; i++) {
+                    if (d_array[i] < min) {
+                        rest_array.push(i);
+                    }
+                }
 
-            //抽一個
-            var maxNum = rest_array.length - 1;
-            var minNum = 0;
-            var result_t = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
-            //result
-            var restaurant = data_array[result_t];
-            var Name = restaurant.Name;
-            var Description = restaurant.Description;
-            var Add = restaurant.Add;
-            var lat_b = restaurant.Py;
-            var lng_b = restaurant.Px;
-            var web = restaurant.Website;
-            var msg = '找到的餐廳資訊如下:\n名稱:' + Name + '\n簡介:' + Description + '\n距離:' + min.toFixed(2) + ' km\n' + web;
-            bot.push(uuid, msg);
-            bot.push(uuid, {type: 'location', title: Name + '地址:', address: Add, latitude: lat_b, longitude: lng_b});
-        } else {
-            console.log('Restaurant_error');
+                if (rest_array.length === 0) {
+                    bot.push(uuid, '抱歉找不到餐廳喔...');
+                    return;
+                }
+
+                //抽一個
+                var maxNum = rest_array.length - 1;
+                var minNum = 0;
+                var result_t = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+                //result
+                var restaurant = data_array[result_t];
+                var Name = restaurant.Name;
+                var Description = restaurant.Description;
+                var Add = restaurant.Add;
+                var lat_b = restaurant.Py;
+                var lng_b = restaurant.Px;
+                var web = restaurant.Website;
+                var msg = '找到的餐廳資訊如下:\n名稱:' + Name + '\n簡介:' + Description + '\n距離:' + min.toFixed(2) + ' km\n' + web;
+                bot.push(uuid, msg);
+                bot.push(uuid, {type: 'location', title: Name + '地址:', address: Add, latitude: lat_b, longitude: lng_b});
+            } else {
+                console.log('Restaurant_error');
+            }
+        } catch (err) {
+            console.log(err);
         }
-    }
-    );
+    });
     console.log('Restaurant_check');
 }
 
