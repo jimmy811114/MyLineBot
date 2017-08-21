@@ -924,7 +924,7 @@ function getUV(userID, u_msg) {
                         result_t = i;
                     }
                 }
-                
+
                 for (var i = 0; i < obj.length; i++) {
                     var SiteName = obj[i].SiteName;
                     if (msg.indexOf(SiteName) !== -1) {
@@ -942,7 +942,8 @@ function getUV(userID, u_msg) {
                 var res = obj[result_t];
                 var UVI = res.UVI;
                 var coun = res.County;
-                var msg = '查到以下紫外線資訊\n' + coun + '的紫外線:' + UVI;
+                var PublishTime = res.PublishTime;
+                var msg = '查到以下紫外線資訊\n' + coun + '的紫外線:' + UVI + '\n更新時間：' + PublishTime;
                 bot.push(userID, msg);
                 var img = my_url + '/images/uv.jpg';
                 bot.push(userID, {
