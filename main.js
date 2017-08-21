@@ -1063,7 +1063,7 @@ function getJoke(uuid) {
 
 //傳送好笑圖片
 function sendJOKE_PIC(uuid) {
-    var dir = './joke';
+    var dir = './public/joke';
 // Print folder name
     fs.readdir(dir, function (err, files) {
         if (!err)
@@ -1071,10 +1071,11 @@ function sendJOKE_PIC(uuid) {
             var data = [];
             files.forEach(function (file) {
                 file_full_path = path.join(dir, file);
-                data.push(file_full_path);
+                data.push(file);
             });
             var result_t = Math.floor(Math.random() * ((data.length - 1) - 0 + 1)) + 0;
-            var img = my_url + '/' + data[result_t];
+            var img = my_url + '/joke/' + data[result_t];
+            console.log(img);
             bot.push(uuid, {
                 type: 'image',
                 originalContentUrl: img,
