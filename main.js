@@ -740,9 +740,9 @@ function sendBus(bus_url, stop_uid) {
 
 setAdmin();
 //氣象
-timer2 = setInterval(getWeather(), 3600000);
+timer2 = setInterval(getWeather(), weather_sec);
 //新聞
-timer3 = setInterval(getNew(), 7200000);
+timer3 = setInterval(getNew(), news_sec);
 console.log('Start: weather');
 console.log('Start: news');
 console.log('Set Admin');
