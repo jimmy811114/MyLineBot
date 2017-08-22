@@ -21,7 +21,7 @@ var member = require('./Member.js'); //會員
 var host_ip = "127.0.0.1"; //資料庫IP
 var my_url = 'https://6bdff784.ngrok.io';
 var admin_msg = '這是老大專用功能喔!';
-var weather_sec = 7200 * 1000;
+var weather_sec = 7210 * 1000;
 var news_sec = 7200 * 1000;
 //--------------------------set
 
