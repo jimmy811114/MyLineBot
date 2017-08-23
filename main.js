@@ -746,6 +746,29 @@ var job = new schedule.scheduleJob(rule, function () {
     sendAll(msg, 5);
     showURL_DATA();
 });
+//早安254
+var rule_1 = new schedule.RecurrenceRule();
+rule_1.hour = 8;
+rule_1.minute = 35;
+rule_1.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
+var job_1 = new schedule.scheduleJob(rule_1, function () {
+    // do jobs here 
+    bus_status = true;
+    clearTimeout(timer);
+    timer = undefined;
+    timer = setInterval(getBus(url_254, bus_stop_254), 30000);
+});
+//早安254
+var rule_2 = new schedule.RecurrenceRule();
+rule_2.hour = 9;
+rule_2.minute = 10;
+rule_2.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
+var job_1 = new schedule.scheduleJob(rule_2, function () {
+    // do jobs here 
+    bus_status = false;
+    clearTimeout(timer);
+    timer = undefined;
+});
 //午安
 var rule2 = new schedule.RecurrenceRule();
 rule2.hour = 12;
