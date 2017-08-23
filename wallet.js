@@ -37,6 +37,15 @@ exports.set_Money = function (userId, money, status, event) {
         msg = '花錢';
     }
     sendMsg(event, msg + ':' + money);
+
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+            handleDisconnect();                         // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+            console.log('SQL error');                                 // server variable configures this)
+        }
+    });
 };
 
 //重新計算
@@ -54,6 +63,15 @@ exports.reset = function (user_id, event) {
     });
     connection.end();
     sendMsg(event, '重新計算');
+
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+            handleDisconnect();                         // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+            console.log('SQL error');                                 // server variable configures this)
+        }
+    });
 };
 
 //顯示金額
@@ -91,6 +109,15 @@ exports.show_Money = function (user_id, event) {
     });
     connection.end();
 
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+            handleDisconnect();                         // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+            console.log('SQL error');                                 // server variable configures this)
+        }
+    });
+
 };
 
 //傳送訊息
@@ -104,14 +131,7 @@ function sendMsg(event, msg) {
     });
 }
 
-connection.on('error', function (err) {
-    console.log('db error', err);
-    if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
-        handleDisconnect();                         // lost due to either server restart, or a
-    } else {                                      // connnection idle timeout (the wait_timeout
-        console.log('SQL error');                                 // server variable configures this)
-    }
-});
+
 
 function handleDisconnect() {
     connection = mysql.createConnection(db_config); // Recreate the connection, since
