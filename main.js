@@ -44,6 +44,15 @@ var bot = linebot({
     channelSecret: 'e3706264cb1f29efc1139468825b3482',
     channelAccessToken: 'b3opydEiDWolKryUMs7STk0rsSKkb+23DtyoRI058FuPyhXXRzTzStDFJZOqlF7ut1wv5V7Zb9UDGAJZuQb8nq2Ng2P/xXwSyJiXMZ4RzAkO9z1uF9EVaOtByhFGpeoMZnUeVSdKM5DAxzclGzlOZwdB04t89/1O/w1cDnyilFU='
 });
+
+var db_config = {
+    host: host_ip,
+    user: 'root',
+    password: 'x22122327',
+    database: 'wallet'
+};
+var connection;
+
 bot.on('message', function (event) {
     console.log(event); //把收到訊息的 event 印出來看看
     try {
@@ -253,12 +262,7 @@ function sendMsg(event, msg) {
 
 //傳給大家
 function sendAll(msg, count) {
-    var connection = mysql.createConnection({
-        host: host_ip,
-        user: 'root',
-        password: 'x22122327',
-        database: 'wallet'
-    });
+    connection = mysql.createConnection(db_config);
     connection.connect();
     var sql = "SELECT uuid FROM member";
     connection.query(sql, function (err, result, fields) {
@@ -301,12 +305,7 @@ function getWeather() {
                     var rainfall = obj.rainfall;
                     var sunset = obj.sunset;
                     var w_msg = desc + '\n溫度:' + temperature + '\n體感:' + felt_air_temp + '\n降雨機率:' + rainfall + '\n日落時間:' + sunset;
-                    var connection = mysql.createConnection({
-                        host: host_ip,
-                        user: 'root',
-                        password: 'x22122327',
-                        database: 'wallet'
-                    });
+                    connection = mysql.createConnection(db_config);
                     connection.connect();
                     var sql = "SELECT uuid FROM member";
                     connection.query(sql, function (err, result, fields) {
@@ -359,12 +358,7 @@ function getNew() {
                         msg_result += count + '. ' + String($(this).text()).trim() + '\n';
                     });
                     msg_result += url;
-                    var connection = mysql.createConnection({
-                        host: host_ip,
-                        user: 'root',
-                        password: 'x22122327',
-                        database: 'wallet'
-                    });
+                    connection = mysql.createConnection(db_config);
                     connection.connect();
                     var sql = "SELECT uuid FROM member";
                     connection.query(sql, function (err, result, fields) {
@@ -407,12 +401,7 @@ function getBus(bus_url, stop_uid) {
                             var result = min + '分' + sec + '秒';
                             var stop_name = stop.Zh_tw;
                             var msg = result + '將到站\n' + stop_name;
-                            var connection = mysql.createConnection({
-                                host: host_ip,
-                                user: 'root',
-                                password: 'x22122327',
-                                database: 'wallet'
-                            });
+                            connection = mysql.createConnection(db_config);
                             connection.connect();
                             var sql = "SELECT uuid FROM member where bus = 1";
                             connection.query(sql, function (err, result, fields) {
@@ -470,12 +459,7 @@ function sendNews() {
                     msg_result += count + '. ' + String($(this).text()).trim() + '\n';
                 });
                 msg_result += url;
-                var connection = mysql.createConnection({
-                    host: host_ip,
-                    user: 'root',
-                    password: 'x22122327',
-                    database: 'wallet'
-                });
+                connection = mysql.createConnection(db_config);
                 connection.connect();
                 var sql = "SELECT uuid FROM member";
                 connection.query(sql, function (err, result, fields) {
@@ -513,12 +497,7 @@ function sendWeather() {
                 var rainfall = obj.rainfall;
                 var sunset = obj.sunset;
                 var w_msg = desc + '\n溫度:' + temperature + '\n體感:' + felt_air_temp + '\n降雨機率:' + rainfall + '\n日落時間:' + sunset;
-                var connection = mysql.createConnection({
-                    host: host_ip,
-                    user: 'root',
-                    password: 'x22122327',
-                    database: 'wallet'
-                });
+                connection = mysql.createConnection(db_config);
                 connection.connect();
                 var sql = "SELECT uuid FROM member";
                 connection.query(sql, function (err, result, fields) {
@@ -711,12 +690,7 @@ function sendBus(bus_url, stop_uid) {
                     var result = min + '分' + sec + '秒';
                     var stop_name = stop.Zh_tw;
                     var msg = result + '將到站\n' + stop_name;
-                    var connection = mysql.createConnection({
-                        host: host_ip,
-                        user: 'root',
-                        password: 'x22122327',
-                        database: 'wallet'
-                    });
+                    connection = mysql.createConnection(db_config);
                     connection.connect();
                     var sql = "SELECT uuid FROM member where bus = 1";
                     connection.query(sql, function (err, result, fields) {
@@ -858,12 +832,7 @@ function isAdmin(account) {
 
 //取得Admin
 function setAdmin() {
-    var connection = mysql.createConnection({
-        host: host_ip,
-        user: 'root',
-        password: 'x22122327',
-        database: 'wallet'
-    });
+    connection = mysql.createConnection(db_config);
     connection.connect();
     var sql = "SELECT uuid FROM member where admin=1";
     connection.query(sql, function (err, result, fields) {
@@ -879,12 +848,7 @@ function setAdmin() {
 
 //傳給狀態
 function sendStatus(userID) {
-    var connection = mysql.createConnection({
-        host: host_ip,
-        user: 'root',
-        password: 'x22122327',
-        database: 'wallet'
-    });
+    connection = mysql.createConnection(db_config);
     connection.connect();
     var sql = "SELECT count(*) as total FROM member";
     connection.query(sql, function (err, result, fields) {
@@ -1083,6 +1047,35 @@ function sendJOKE_PIC(uuid) {
                 previewImageUrl: img
             });
             console.log('send_jokePic');
+        }
+    });
+}
+
+connection.on('error', function (err) {
+    console.log('db error', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+        handleDisconnect();                         // lost due to either server restart, or a
+    } else {                                      // connnection idle timeout (the wait_timeout
+        console.log('SQL error');                                 // server variable configures this)
+    }
+});
+
+function handleDisconnect() {
+    connection = mysql.createConnection(db_config); // Recreate the connection, since
+    // the old one cannot be reused.
+    connection.connect(function (err) {              // The server is either down
+        if (err) {                                     // or restarting (takes a while sometimes).
+            console.log('error when connecting to db:', err);
+            setTimeout(handleDisconnect, 2000); // We introduce a delay before attempting to reconnect,
+        }                                     // to avoid a hot loop, and to allow our node script to
+    });                                     // process asynchronous requests in the meantime.
+    // If you're also serving http, display a 503 error.
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+            handleDisconnect();                         // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+            console.log('SQL error');                                               // server variable configures this)
         }
     });
 }

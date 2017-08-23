@@ -5,15 +5,18 @@
  */
 
 var mysql = require('mysql');
+var host_ip = "127.0.0.1"; //資料庫IP
+var db_config = {
+    host: host_ip,
+    user: 'root',
+    password: 'x22122327',
+    database: 'wallet'
+};
+var connection;
 
 //建立
 exports.set_Money = function (userId, money, status, event) {
-    var connection = mysql.createConnection({
-        host: '127.0.0.1',
-        user: 'root',
-        password: 'x22122327',
-        database: 'wallet'
-    });
+    connection = mysql.createConnection(db_config);
     connection.connect();
     var addSql = 'INSERT INTO money(money,type,user) VALUES(?,?,?)';
     var addSqlParams = [money, status, userId];
@@ -38,12 +41,7 @@ exports.set_Money = function (userId, money, status, event) {
 
 //重新計算
 exports.reset = function (user_id, event) {
-    var connection = mysql.createConnection({
-        host: '127.0.0.1',
-        user: 'root',
-        password: 'x22122327',
-        database: 'wallet'
-    });
+    connection = mysql.createConnection(db_config);
     connection.connect();
     var addSql = "delete from money where user = '" + user_id + "'";
     //建立
@@ -60,12 +58,7 @@ exports.reset = function (user_id, event) {
 
 //顯示金額
 exports.show_Money = function (user_id, event) {
-    var connection = mysql.createConnection({
-        host: '127.0.0.1',
-        user: 'root',
-        password: 'x22122327',
-        database: 'wallet'
-    });
+    connection = mysql.createConnection(db_config);
     connection.connect();
     var sql = "SELECT sum(money) as total FROM money where type = 1 and user = '" + user_id + "'";
     var sql0 = "SELECT sum(money) as total FROM money where type = 0 and user = '" + user_id + "'";
@@ -108,5 +101,34 @@ function sendMsg(event, msg) {
     }).catch(function (error) {
         // error 
         console.log('error');
+    });
+}
+
+connection.on('error', function (err) {
+    console.log('db error', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+        handleDisconnect();                         // lost due to either server restart, or a
+    } else {                                      // connnection idle timeout (the wait_timeout
+        console.log('SQL error');                                 // server variable configures this)
+    }
+});
+
+function handleDisconnect() {
+    connection = mysql.createConnection(db_config); // Recreate the connection, since
+    // the old one cannot be reused.
+    connection.connect(function (err) {              // The server is either down
+        if (err) {                                     // or restarting (takes a while sometimes).
+            console.log('error when connecting to db:', err);
+            setTimeout(handleDisconnect, 2000); // We introduce a delay before attempting to reconnect,
+        }                                     // to avoid a hot loop, and to allow our node script to
+    });                                     // process asynchronous requests in the meantime.
+    // If you're also serving http, display a 503 error.
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+            handleDisconnect();                         // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+            console.log('SQL error');                                               // server variable configures this)
+        }
     });
 }
