@@ -39,6 +39,9 @@ var bus_stop_254 = "TPE17606";
 var url_254 = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Taipei/254?$top=100&$format=JSON";
 var bus_stop_913 = "NWT19549";
 var url_913 = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/NewTaipei/913?$top=100&$format=JSON";
+var bus_stop_672 = "TPE38910";
+var url_672 = "http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Taipei/672?$top=100&$format=JSON";
+
 var bot = linebot({
     channelId: '1530553288',
     channelSecret: 'e3706264cb1f29efc1139468825b3482',
@@ -121,6 +124,20 @@ bot.on('message', function (event) {
                 bus_status = true;
                 timer = setInterval(getBus(url_254, bus_stop_254), 30000);
                 sendMsg(event, '254-->啟動');
+                bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '12'});
+            } else if (msg.indexOf("672") !== -1) {
+                //672
+                if (!isAdmin(user_id)) {
+                    bot.push(user_id, admin_msg);
+                    return;
+                }
+                if (bus_status) {
+                    bot.push(user_id, '公車已經啟動囉！');
+                    return;
+                }
+                bus_status = true;
+                timer = setInterval(getBus(url_672, bus_stop_672), 30000);
+                sendMsg(event, '672-->啟動');
                 bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '12'});
             } else if (msg.indexOf("公車停") !== -1) {
                 //stop
@@ -782,10 +799,14 @@ var job2 = new schedule.scheduleJob(rule2, function () {
 //下班
 var rule3 = new schedule.RecurrenceRule();
 rule3.hour = 18;
-rule3.minute = 0;
+rule3.minute = 25;
 rule3.dayOfWeek = [new schedule.Range(1, 5)]; // 每星期日.四~六的下午5點0分
 var job3 = new schedule.scheduleJob(rule3, function () {
     // do jobs here 
+    bus_status = true;
+    clearTimeout(timer);
+    timer = undefined;
+    timer = setInterval(getBus(url_672, bus_stop_672), 30000);
     var msg = '準備下班了~辛苦囉';
     sendAll(msg, 11);
 });
