@@ -33,6 +33,8 @@ var os_u = require('os-utils');
 var bus_status = false;
 var report_status = true;
 //-----------------------------------------
+var my_ques = '還沒有出題喔!';
+var my_ans;
 
 
 var bus_stop_254 = "TPE17606";
@@ -153,6 +155,12 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("清除") !== -1) {
                 //重新計算
                 wallet.reset(user_id, event);
+            } else if (msg.indexOf("出題") !== -1) {
+                //出題
+                getQuestion(user_id);
+            } else if (msg.indexOf("解答") !== -1) {
+                //出題
+                bot.push(user_id, '公布答案囉~\n' + my_ans);
             } else if (msg.indexOf("預報") !== -1) {
                 //預報
                 if (!isAdmin(user_id)) {
@@ -1123,5 +1131,56 @@ function handleDisconnect() {
         }
     });
 }
+
+function getQuestion(uuid) {
+//目标网址
+    var title = [2157, 2158, 2159];
+    var count = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
+    var page = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+    var web = title[count];
+    var count_t = [0, 600, 1200];
+    var page_count = 60;
+    if (page !== 1) {
+        web += '_' + page;
+    }
+    var page_limit = count_t[count] + (page * page_count);
+    var page_under = page_limit - 60 + 1;
+    var url = 'http://naojinjizhuanwan.xyun.org/miyushoucang/' + web + '.html';
+    var question = page_under + (Math.floor(Math.random() * (60 - 0 + 1)) + 1) + 2;
+    var un_question = question - 1;
+//发送请求
+    request(url, function (error, response, body) {
+        try {
+            if (!error && response.statusCode == 200) {
+                var $ = cheerio.load(body);
+                var data;
+                $('.main div[id=endtext]').each(function () {
+                    var text = $(this).text();
+                    data = text;
+                });
+                var ans = data.split(getNum(question))[0].split(getNum(un_question))[1];
+                var qus = String(ans).split('答案：')[0];
+                my_ques = qus;
+                my_ans = ans;
+                bot.push(uuid, '題目來囉~\n' + my_ans);
+                console.log('ans_send');
+            }
+        } catch (err) {
+            console.log('ans_error');
+        }
+    });
+
+    function getNum(num) {
+        var d = 4 - String(num).length;
+        var result = num;
+        if (d !== 0) {
+            for (var i = 0; i < d; i++) {
+                result = '0' + result;
+            }
+        }
+        return result;
+    }
+}
+
 
 
