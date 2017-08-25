@@ -1162,7 +1162,7 @@ function getQuestion(uuid) {
                 var qus = String(ans).split('答案：')[0];
                 my_ques = qus;
                 my_ans = ans;
-                bot.push(uuid, '題目來囉~\n' + my_ans);
+                bot.push(uuid, '題目來囉~\n' + my_ques);
                 console.log('ans_send');
             }
         } catch (err) {
