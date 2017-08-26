@@ -1212,12 +1212,11 @@ function getPPT(uuid, query) {
                 getQuestion2(links[t]);
             } else {
                 console.log('error');
-                getPPT(uuid, query);
-                
+                bot.push(uuid, 'Error');
             }
         } catch (err) {
-            console.log('error');
-            getPPT(uuid, query);
+            console.log('error:' + err);
+            bot.push(uuid, 'Error:' + err);
         }
     });
 
@@ -1234,16 +1233,21 @@ function getPPT(uuid, query) {
                     });
                     var t = Math.floor(Math.random() * (datas.length - 0 + 1)) + 0;
                     var msg = String(datas[t]).split(': ')[1];
-                    bot.push(uuid, msg);
+                    if (msg.length < 2) {
+                        bot.push(uuid, '我不知道怎麼回答耶...');
+                    } else {
+                        bot.push(uuid, msg);
+                    }
+
                     console.log('ans_send');
                 } else {
                     console.log('error');
-                    getPPT(uuid, query);
+                    bot.push(uuid, 'Error');
                 }
             });
         } catch (err) {
-            console.log('error');
-            getPPT(uuid, query);
+            console.log('error:' + err);
+            bot.push(uuid, 'Error:' + err);
         }
     }
 }
