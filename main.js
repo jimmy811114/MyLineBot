@@ -19,7 +19,7 @@ var member = require('./Member.js'); //會員
 
 //--------------------------set
 var host_ip = "127.0.0.1"; //資料庫IP
-var my_url = 'https://6bdff784.ngrok.io';
+var my_url = 'https://2ea947df.ngrok.io';
 var admin_msg = '這是老大專用功能喔!';
 var weather_sec = 7210 * 1000;
 var news_sec = 7200 * 1000;
@@ -1232,10 +1232,14 @@ function getPPT(uuid, query) {
                         var text = String($(this).text()).trim();
                         datas.push(text);
                     });
-                    var t = Math.floor(Math.random() * (datas.length - 0 + 1)) + 0;
-                    var msg = String(datas[t]).split(': ')[1];
+                    var msg = undefined;
+                    var t;
                     if (datas.length > 0) {
-                        bot.push(uuid, msg);
+                        if (datas[t] !== undefined) {
+                            bot.push(uuid, msg);
+                        } else {
+                            bot.push(uuid, '也許你可以參考下列:\n' + url);
+                        }
                     } else {
                         bot.push(uuid, '也許你可以參考下列:\n' + url);
                     }
