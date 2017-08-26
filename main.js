@@ -213,11 +213,11 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("笑話") !== -1) {
                 //傳送笑話
                 getJoke(user_id);
-            } else if (msg.indexOf("新增PPT") !== -1) {
+            } else if (msg.indexOf("新增PTT") !== -1) {
                 //新增PPT
                 ppt_array.push(user_id);
                 sendMsg(event, '已增加PTT使用者~');
-            } else if (msg.indexOf("刪除PPT") !== -1) {
+            } else if (msg.indexOf("刪除PTT") !== -1) {
                 //新增PPT
                 ppt_array.remove(user_id);
                 sendMsg(event, '已刪除PTT使用者~');
