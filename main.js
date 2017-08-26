@@ -35,6 +35,7 @@ var report_status = true;
 //-----------------------------------------
 var my_ques = '還沒有出題喔!';
 var my_ans;
+var ppt_array = [];
 
 
 var bus_stop_254 = "TPE17606";
@@ -212,6 +213,14 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("笑話") !== -1) {
                 //傳送笑話
                 getJoke(user_id);
+            } else if (msg.indexOf("新增PPT") !== -1) {
+                //新增PPT
+                ppt_array.push(user_id);
+                sendMsg(event, '已增加PPT使用者~');
+            } else if (msg.indexOf("刪除PPT") !== -1) {
+                //新增PPT
+                ppt_array.remove(user_id);
+                sendMsg(event, user_id + '已刪除PPT使用者~');
             } else if (msg.indexOf("jimmy") !== -1 || msg.indexOf("Jimmy") !== -1) {
                 //系統狀態
                 os_u.cpuUsage(function (v) {
@@ -236,21 +245,25 @@ bot.on('message', function (event) {
                     }
                 });
             } else {
-                if (group_id === undefined && room_id === undefined) {
-                    var robot_msg = 'Hi~我是咪咪你可以問我：\n';
-                    fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
-                        if (error) { //如果有錯誤就列印訊息並離開程式
-                            console.log('檔案讀取錯誤。');
-                        } else {
-                            //把檔案的內容輸出
-                            //注意content變數的類型不是一個字串（String）
-                            //而是一個Buffer物件，所以要用 Buffer.toString() 方法來
-                            //把這Buffer物件的內容變成一個字串，以作輸出。
-                            //下回教學會解釋Buffer物件是用來幹什麼的                   
-                            sendMsg(event, robot_msg + content.toString());
-                            bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '2'});
-                        }
-                    });
+                if (isInPPT(user_id)) {
+                    getPPT(user_id, msg);
+                } else {
+                    if (group_id === undefined && room_id === undefined) {
+                        var robot_msg = 'Hi~我是咪咪你可以問我：\n';
+                        fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
+                            if (error) { //如果有錯誤就列印訊息並離開程式
+                                console.log('檔案讀取錯誤。');
+                            } else {
+                                //把檔案的內容輸出
+                                //注意content變數的類型不是一個字串（String）
+                                //而是一個Buffer物件，所以要用 Buffer.toString() 方法來
+                                //把這Buffer物件的內容變成一個字串，以作輸出。
+                                //下回教學會解釋Buffer物件是用來幹什麼的                   
+                                sendMsg(event, robot_msg + content.toString());
+                                bot.push(user_id, {type: 'sticker', packageId: '1', stickerId: '2'});
+                            }
+                        });
+                    }
                 }
             }
         } else if (event.message.type === 'location') {
@@ -1181,6 +1194,72 @@ function getQuestion(uuid) {
         return result;
     }
 }
+
+//取得PPT資料
+function getPPT(uuid, query) {
+    var url = "https://www.googleapis.com/customsearch/v1?key=AIzaSyCPuSrivItLONsbNPCspBIXkwUxlQud7I8&cx=012980048938927832381:y6j2rupzozm&q=" + encodeURIComponent(query);
+    request(url, function (error, response, body) {
+        try {
+            if (!error && response.statusCode === 200) {
+                var body_data = String(body).trim();
+                var obj = JSON.parse(body_data);
+                var items = obj.items;
+                var links = [];
+                for (var i = 0; i < items.length; i++) {
+                    links.push(items[i].link);
+                }
+                var t = Math.floor(Math.random() * (links.length - 0 + 1)) + 0;
+                getQuestion2(links[t]);
+            } else {
+                console.log('error');
+            }
+        } catch (err) {
+            console.log('error');
+        }
+    });
+
+    function getQuestion2(url) {
+        try {
+            request(url, function (error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    var $ = cheerio.load(body);
+                    var datas = [];
+                    // 篩選有興趣的資料
+                    $('.push .push-content').each(function (i, elem) {
+                        var text = String($(this).text()).trim();
+                        datas.push(text);
+                    });
+                    var t = Math.floor(Math.random() * (datas.length - 0 + 1)) + 0;
+                    var msg = String(datas[t]).split(': ')[1];
+                    bot.push(uuid, msg);
+                    console.log('ans_send');
+                } else {
+                    console.log('error');
+                }
+            });
+        } catch (err) {
+            console.log('error');
+        }
+    }
+}
+
+function isInPPT(user_id) {
+    var index = ppt_array.indexOf(user_id);
+    var result = false;
+    if (index > -1) {
+        result = true;
+    }
+    return result;
+}
+
+Array.prototype.remove = function (val) {
+    var index = this.indexOf(val);
+    if (index > -1) {
+        this.splice(index, 1);
+    }
+};
+
+
 
 
 
