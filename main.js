@@ -36,6 +36,7 @@ var report_status = true;
 var my_ques = '還沒有出題喔!';
 var my_ans;
 var ppt_array = [];
+var ptt = 'what?';
 
 
 var bus_stop_254 = "TPE17606";
@@ -203,6 +204,10 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("狀態") !== -1) {
                 //系統狀態
                 sendStatus(user_id);
+            } else if (msg.indexOf("jimmy") !== -1 || msg.indexOf("Jimmy") !== -1) {
+                //系統狀態
+                console.log('computer check');
+                getPCStatus(user_id);
             } else if (msg.indexOf("搞笑") !== -1) {
                 //搞笑
                 sendJOKE_PIC(user_id);
@@ -213,6 +218,10 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("笑話") !== -1) {
                 //傳送笑話
                 getJoke(user_id);
+            } else if (msg.indexOf("來源") !== -1) {
+                //系統狀態
+                console.log('check');
+                sendMsg(event, ptt);
             } else if (msg.indexOf("新增PTT") !== -1) {
                 //新增PPT
                 ppt_array.push(user_id);
@@ -221,14 +230,6 @@ bot.on('message', function (event) {
                 //新增PPT
                 ppt_array.remove(user_id);
                 sendMsg(event, '已刪除PTT使用者~');
-            } else if (msg.indexOf("jimmy") !== -1 || msg.indexOf("Jimmy") !== -1) {
-                //系統狀態
-                os_u.cpuUsage(function (v) {
-                    var total_mem = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
-                    var free_mem = (os.freemem() / 1024 / 1024 / 1024).toFixed(2);
-                    var sys_msg = '【電腦系統狀態】\nCPU Usage : ' + v.toFixed(2) + '%\nTotal memory : ' + total_mem + 'GB\nFree memory : ' + free_mem + 'GB';
-                    bot.push(user_id, sys_msg);
-                });
             } else if (msg.indexOf("說明") !== -1 || msg.indexOf("咪咪") !== -1) {
                 var robot_msg = 'Hi~我是咪咪你可以問我：\n';
                 fs.readFile('help.txt', function (error, content) { //讀取file.txt檔案的內容
@@ -1200,57 +1201,57 @@ function getPPT(uuid, query) {
     var url = "https://www.googleapis.com/customsearch/v1?key=AIzaSyCPuSrivItLONsbNPCspBIXkwUxlQud7I8&cx=012980048938927832381:y6j2rupzozm&q=" + encodeURIComponent(query);
     request(url, function (error, response, body) {
         try {
-            if (!error && response.statusCode === 200) {
-                var body_data = String(body).trim();
-                var obj = JSON.parse(body_data);
-                var items = obj.items;
-                var links = [];
-                for (var i = 0; i < items.length; i++) {
-                    links.push(items[i].link);
-                }
-                var t = Math.floor(Math.random() * (links.length - 0 + 1)) + 0;
+            var body_data = String(body).trim();
+            var obj = JSON.parse(body_data);
+            var items = obj.items;
+            var links = [];
+            for (var i = 0; i < items.length; i++) {
+                links.push(items[i].link);
+            }
+            var t = Math.floor(Math.random() * (links.length - 0 + 1)) + 0;
+            if (links[t] !== undefined) {
                 getQuestion2(links[t]);
             } else {
-                console.log('error');
-                bot.push(uuid, 'Error');
+                bot.push(uuid, '不知道怎麼回答耶...');
             }
         } catch (err) {
+            bot.push(uuid, err);
             console.log('error:' + err);
-            bot.push(uuid, 'Error:' + err);
         }
     });
 
     function getQuestion2(url) {
         try {
+            ptt = url;
             request(url, function (error, response, body) {
                 if (!error && response.statusCode === 200) {
                     var $ = cheerio.load(body);
                     var datas = [];
                     // 篩選有興趣的資料
-                    $('.push .push-content').each(function (i, elem) {
+                    $('div[id^="main-container"] .push span[class^="f3 push-content"]').each(function (i, elem) {
                         var text = String($(this).text()).trim();
-                        datas.push(text);
+                        datas.push(text + '\n' + url);
                     });
                     var t = Math.floor(Math.random() * (datas.length - 0 + 1)) + 0;
                     var msg = String(datas[t]).split(': ')[1];
-                    if (msg.length < 2) {
-                        bot.push(uuid, '我不知道怎麼回答耶...');
-                    } else {
+                    if (datas.length > 0) {
                         bot.push(uuid, msg);
+                    } else {
+                        bot.push(uuid, '也許你可以參考下列:\n' + url);
                     }
-
-                    console.log('ans_send');
+                    console.log(msg);
                 } else {
-                    console.log('error');
-                    bot.push(uuid, 'Error');
+                    bot.push(uuid, '也許你可以參考下列:\n' + url);
                 }
             });
         } catch (err) {
-            console.log('error:' + err);
-            bot.push(uuid, 'Error:' + err);
+            bot.push(uuid, err);
+            console.log(url);
         }
     }
 }
+
+
 
 function isInPPT(user_id) {
     var index = ppt_array.indexOf(user_id);
@@ -1268,6 +1269,19 @@ Array.prototype.remove = function (val) {
     }
 };
 
+
+function getPCStatus(uuid) {
+    try {
+        os_u.cpuUsage(function (v) {
+            var total_mem = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
+            var free_mem = (os.freemem() / 1024 / 1024 / 1024).toFixed(2);
+            var sys_msg = '【電腦系統狀態】\nCPU Usage : ' + v.toFixed(2) + '%\nTotal memory : ' + total_mem + 'GB\nFree memory : ' + free_mem + 'GB';
+            bot.push(uuid, sys_msg);
+        });
+    } catch (err) {
+        bot.push(uuid, err);
+    }
+}
 
 
 

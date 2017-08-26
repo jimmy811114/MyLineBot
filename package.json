@@ -1,5 +1,10 @@
 {
     "name": "MyNodeJS",
+    "generators": {
+        "modules": {
+            "permissions-api": "node_modules/sails-permissions/generator"
+        }
+    },
     "version": "1.0.0",
     "keywords": ["util", "functional", "server", "client", "browser"],
     "author": "Jimmy",
