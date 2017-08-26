@@ -220,7 +220,7 @@ bot.on('message', function (event) {
             } else if (msg.indexOf("刪除PPT") !== -1) {
                 //新增PPT
                 ppt_array.remove(user_id);
-                sendMsg(event, user_id + '已刪除PPT使用者~');
+                sendMsg(event, '已刪除PPT使用者~');
             } else if (msg.indexOf("jimmy") !== -1 || msg.indexOf("Jimmy") !== -1) {
                 //系統狀態
                 os_u.cpuUsage(function (v) {
