@@ -1212,9 +1212,12 @@ function getPPT(uuid, query) {
                 getQuestion2(links[t]);
             } else {
                 console.log('error');
+                getPPT(uuid, query);
+                
             }
         } catch (err) {
             console.log('error');
+            getPPT(uuid, query);
         }
     });
 
@@ -1235,10 +1238,12 @@ function getPPT(uuid, query) {
                     console.log('ans_send');
                 } else {
                     console.log('error');
+                    getPPT(uuid, query);
                 }
             });
         } catch (err) {
             console.log('error');
+            getPPT(uuid, query);
         }
     }
 }
