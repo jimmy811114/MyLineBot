@@ -1230,7 +1230,7 @@ function getPPT(uuid, query) {
                     // 篩選有興趣的資料
                     $('div[id^="main-container"] .push span[class^="f3 push-content"]').each(function (i, elem) {
                         var text = String($(this).text()).trim();
-                        datas.push(text + '\n' + url);
+                        datas.push(text);
                     });
                     var t = Math.floor(Math.random() * (datas.length - 0 + 1)) + 0;
                     var msg = String(datas[t]).split(': ')[1];
