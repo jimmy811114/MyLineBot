@@ -1199,6 +1199,7 @@ function getQuestion(uuid) {
 //取得PPT資料
 function getPPT(uuid, query) {
     var url = "https://www.googleapis.com/customsearch/v1?key=AIzaSyCPuSrivItLONsbNPCspBIXkwUxlQud7I8&cx=012980048938927832381:y6j2rupzozm&q=" + encodeURIComponent(query);
+    console.log(url);
     request(url, function (error, response, body) {
         try {
             var body_data = String(body).trim();
@@ -1213,16 +1214,18 @@ function getPPT(uuid, query) {
                 getQuestion2(links[t]);
             } else {
                 bot.push(uuid, '不知道怎麼回答耶...');
+                //console.log('no_data');
             }
         } catch (err) {
             bot.push(uuid, err);
-            console.log('error:' + err);
+            //console.log('error:' + err);
         }
     });
 
     function getQuestion2(url) {
+        ptt = url;
         try {
-            ptt = url;
+            console.log(url);
             request(url, function (error, response, body) {
                 if (!error && response.statusCode === 200) {
                     var $ = cheerio.load(body);
@@ -1232,16 +1235,14 @@ function getPPT(uuid, query) {
                         var text = String($(this).text()).trim();
                         datas.push(text);
                     });
-                    var msg = undefined;
-                    var t;
-                    if (datas.length > 0) {
-                        if (datas[t] !== undefined) {
-                            bot.push(uuid, msg);
-                        } else {
-                            bot.push(uuid, '也許你可以參考下列:\n' + url);
-                        }
+                    var t = Math.floor(Math.random() * (datas.length - 0 + 1)) + 0;
+                    var msg = String(datas[t]).split(':')[1];
+                    if (datas.length > 0 && datas[t] !== undefined) {
+                        bot.push(uuid, msg);
+                        console.log('msg:' + msg);
                     } else {
                         bot.push(uuid, '也許你可以參考下列:\n' + url);
+                        //console.log('no:' + url);
                     }
                     console.log(msg);
                 } else {
@@ -1249,7 +1250,7 @@ function getPPT(uuid, query) {
                 }
             });
         } catch (err) {
-            bot.push(uuid, err);
+            //bot.push(uuid, err);
             console.log(url);
         }
     }
