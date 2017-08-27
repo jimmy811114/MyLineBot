@@ -19,12 +19,12 @@ var member = require('./Member.js'); //會員
 
 //--------------------------set
 var host_ip = "127.0.0.1"; //資料庫IP
-var my_url = 'https://2ea947df.ngrok.io';
+var my_url = 'https://674a9555.ngrok.io';
 var admin_msg = '這是老大專用功能喔!';
 var weather_sec = 7210 * 1000;
 var news_sec = 7200 * 1000;
 //--------------------------set
-
+var search_count = 1000;
 var admin_user = '';
 //電腦狀態
 var os = require('os');
@@ -838,7 +838,8 @@ rule4.hour = 23;
 rule4.minute = 0;
 rule4.dayOfWeek = [new schedule.Range(1, 6)]; // 每星期日.四~六的下午5點0分
 var job4 = new schedule.scheduleJob(rule4, function () {
-    // do jobs here 
+    // do jobs here
+    search_count = 1000;
     clearTimeout(timer2);
     clearTimeout(timer3);
     report_status = false;
@@ -924,7 +925,7 @@ function sendStatus(userID) {
         }
         if (result.length > 0) {
             var total = result[0].total; //人數
-            var msg = '【狀態】\n會員人數:' + total + '\n公車播報:' + bus_status + '\n預報播報:' + report_status;
+            var msg = '【狀態】\n會員人數:' + total + '\n公車播報:' + bus_status + '\n預報播報:' + report_status + '\n查詢次數:' + search_count;
             bot.push(userID, msg);
         } else {
             bot.push(userID, '目前沒有資料');
@@ -1198,10 +1199,15 @@ function getQuestion(uuid) {
 
 //取得PPT資料
 function getPPT(uuid, query) {
+    if (search_count === 0) {
+        bot.push(uuid, '請明天再問我囉~');
+        return;
+    }
     var url = "https://www.googleapis.com/customsearch/v1?key=AIzaSyCPuSrivItLONsbNPCspBIXkwUxlQud7I8&cx=012980048938927832381:y6j2rupzozm&q=" + encodeURIComponent(query);
     console.log(url);
     request(url, function (error, response, body) {
         try {
+            search_count--;
             var body_data = String(body).trim();
             var obj = JSON.parse(body_data);
             var items = obj.items;
